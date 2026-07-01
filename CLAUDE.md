@@ -28,7 +28,7 @@ This is a minimal **.NET 10.0 ASP.NET Core Web API** starter project using the M
 
 This project is a **work-in-progress starter template** designed to be cloned/reused as the base for new minimal API projects. The author is learning and building it incrementally. Planned features to add:
 
-1. **ASP.NET Core + EF Core + SQLite** — data persistence using Entity Framework Core with SQLite
+1. **ASP.NET Core + EF Core + PostgreSQL** — data persistence using Entity Framework Core with PostgreSQL
 2. **Swagger** — API documentation (OpenAPI/Swagger UI)
 3. **Serilog** — structured logging
 4. **CORS** — Cross-origin resource sharing configuration
