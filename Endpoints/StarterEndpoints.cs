@@ -6,7 +6,7 @@ public static class StarterEndpoints
 {
     public static void MapEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/starter");
+        var group = app.MapGroup("/app");
 
         group.MapPost("/login", LoginHandler.Handler);
     }
