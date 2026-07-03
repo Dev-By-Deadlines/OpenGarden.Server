@@ -1,7 +1,9 @@
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
+using StarterKit.Api.Constants;
 using StarterKit.Api.Data;
 using StarterKit.Api.Endpoints;
 
@@ -56,6 +58,9 @@ try
                 .UseNodaTime()));
     // o.MapEnum<Mood>("mood") later for using postgres enums.
 
+    builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+        .AddEntityFrameworkStores<AppDbContext>();
+
     builder.Services.AddOpenApi();
 
     var app = builder.Build();
@@ -71,12 +76,21 @@ try
                 .WithTheme(ScalarTheme.Saturn)
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.Fetch)
                 );
+    }
 
-        // Production: run "dotnet ef database update" on the server before deploying
-        using (var scope = app.Services.CreateScope())
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
+
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        if (!await roleManager.RoleExistsAsync(Roles.Admin))
         {
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            db.Database.Migrate();
+            await roleManager.CreateAsync(new IdentityRole(Roles.Admin));
+        }
+        if (!await roleManager.RoleExistsAsync(Roles.Member))
+        {
+            await roleManager.CreateAsync(new IdentityRole(Roles.Member));
         }
     }
 
