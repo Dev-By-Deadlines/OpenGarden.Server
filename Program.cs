@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
@@ -28,6 +29,27 @@ try
                 .AllowAnyHeader()
                 .AllowCredentials()));
 
+    builder.Services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = 429;
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 100,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueLimit = 0
+                        }));
+
+            //     Named policy for specific endpoints that need stricter limits
+            // options.AddFixedWindowLimiter("FixedPolicy", opt =>
+            // {
+            //     opt.Window = TimeSpan.FromMinutes(1);
+            //     opt.PermitLimit = 60;
+            // });
+        });
+
     builder.Services.AddDbContextPool<AppDbContext>(opt =>
             opt.UseNpgsql(builder.Configuration.GetConnectionString("Default"),
                 o => o
@@ -39,6 +61,7 @@ try
     var app = builder.Build();
     app.UseSerilogRequestLogging();
     app.UseCors();
+    app.UseRateLimiter();
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
@@ -49,7 +72,7 @@ try
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.Fetch)
                 );
 
-        // For production: run "dotnet ef database update" separately instead.
+        // Production: run "dotnet ef database update" on the server before deploying
         using (var scope = app.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
