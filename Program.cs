@@ -22,6 +22,12 @@ try
     var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddSerilog();
 
+    builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+                policy.WithOrigins("http://localhost:3000")
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()));
+
     builder.Services.AddDbContextPool<AppDbContext>(opt =>
             opt.UseNpgsql(builder.Configuration.GetConnectionString("Default"),
                 o => o
@@ -31,7 +37,8 @@ try
     builder.Services.AddOpenApi();
 
     var app = builder.Build();
-
+    app.UseSerilogRequestLogging();
+    app.UseCors();
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
@@ -41,13 +48,13 @@ try
                 .WithTheme(ScalarTheme.Saturn)
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.Fetch)
                 );
-    }
 
-    // For production, run "dotnet ef database update" separately instead.
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        db.Database.Migrate();
+        // For production: run "dotnet ef database update" separately instead.
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            db.Database.Migrate();
+        }
     }
 
     app.MapEndpoints();
