@@ -1,6 +1,8 @@
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
 using StarterKit.Api.Constants;
@@ -61,6 +63,21 @@ try
     builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
         .AddEntityFrameworkStores<AppDbContext>();
 
+    builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+    .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters.ValidIssuer = builder.Configuration["Jwt:Issuer"];
+                options.TokenValidationParameters.ValidAudience = builder.Configuration["Jwt:Audience"];
+                options.TokenValidationParameters.IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!));
+            });
+
+    builder.Services.AddAuthorization();
     builder.Services.AddOpenApi();
 
     var app = builder.Build();
@@ -95,6 +112,8 @@ try
     }
 
     app.MapEndpoints();
+    app.UseAuthentication();
+    app.UseAuthorization();
     app.Run();
 }
 catch (Exception ex)

@@ -19,7 +19,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/) loosely:
 | `feat` | Adding a new feature / API endpoint |
 | `fix` | Fixing a bug |
 | `refactor` | Rewriting code without changing behavior |
-| `docs` | Updating `CLAUDE.md`, `README.md`, or in-code docs |
+| `docs` | Updating `AGENTS.md`, `README.md`, or in-code docs |
 | `chore` | Build scripts, tooling, `.gitignore`, etc. |
 | `deps` | Adding / updating / removing NuGet packages |
 | `config` | Changing `appsettings*.json`, launch profiles, or cfg behavior |
@@ -44,4 +44,4 @@ Work directly on `main`. If experimenting with a risky change, branch with a sho
 
 ## Updating the Template
 
-When a feature is complete and stable, update `CLAUDE.md` to reflect new packages, endpoints, or configuration so future sessions know the current state.
+When a feature is complete and stable, update `AGENTS.md` to reflect new packages, endpoints, or configuration so future sessions know the current state.
