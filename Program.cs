@@ -8,6 +8,8 @@ using Serilog;
 using StarterKit.Api.Constants;
 using StarterKit.Api.Data;
 using StarterKit.Api.Endpoints;
+using StarterKit.Api.Jobs;
+using StarterKit.Api.Services;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -75,10 +77,22 @@ try
                 options.TokenValidationParameters.IssuerSigningKey =
                     new SymmetricSecurityKey(
                             System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!));
+
+                options.Events.OnMessageReceived = context =>
+                {
+                    var token = context.Request.Cookies["accessToken"];
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        context.Token = token;
+                    }
+                    return Task.CompletedTask;
+                };
             });
 
     builder.Services.AddAuthorization();
     builder.Services.AddOpenApi();
+    builder.Services.AddScoped<TokenProvider>();
+    builder.Services.AddHostedService<ExpiredTokenCleanupJob>();
 
     var app = builder.Build();
     app.UseSerilogRequestLogging();

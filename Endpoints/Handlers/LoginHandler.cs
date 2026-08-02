@@ -1,10 +1,10 @@
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
+using NodaTime;
 using StarterKit.Api.Data;
 using StarterKit.Api.Dtos;
+using StarterKit.Api.Extensions;
+using StarterKit.Api.Models;
+using StarterKit.Api.Services;
 
 namespace StarterKit.Api.Endpoints.Handlers;
 
@@ -13,7 +13,9 @@ public class LoginHandler
     public static async Task<IResult> Handler(
         LoginDto loginDto,
         UserManager<ApplicationUser> userManager,
-        IConfiguration configuration)
+        AppDbContext dbContext,
+        TokenProvider tokenProvider,
+        HttpContext httpContext)
     {
         var user = await userManager.FindByEmailAsync(loginDto.Email);
 
@@ -21,32 +23,22 @@ public class LoginHandler
         {
             return Results.Unauthorized();
         }
+        string accessToken = await tokenProvider.CreateAccessToken(user);
 
-        var roles = await userManager.GetRolesAsync(user);
-
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:SecretKey"]!));
-        var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-
-        List<Claim> claims =
-        [
-            new(JwtRegisteredClaimNames.Sub, user.Id),
-            new(JwtRegisteredClaimNames.Email, user.Email!),
-            ..roles.Select(r => new Claim(ClaimTypes.Role, r))
-        ];
-
-        var tokenDescriptor = new SecurityTokenDescriptor
+        var refreshToken = new RefreshToken
         {
-            Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(configuration.GetValue<int>("Jwt:ExpirationInMinutes")),
-            SigningCredentials = credentials,
-            Issuer = configuration["Jwt:Issuer"],
-            Audience = configuration["Jwt:Audience"]
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            Token = tokenProvider.GenerateRefreshToken(),
+            Expires = SystemClock.Instance.GetCurrentInstant() + Duration.FromDays(7)
         };
 
-        var tokenHandler = new JsonWebTokenHandler();
+        httpContext.AppendAccessTokenCookie(accessToken);
+        httpContext.AppendRefreshTokenCookie(refreshToken.Token);
 
-        string accessToken = tokenHandler.CreateToken(tokenDescriptor);
+        dbContext.RefreshTokens.Add(refreshToken);
+        await dbContext.SaveChangesAsync();
 
-        return Results.Ok(new { accessToken });
+        return Results.Ok();
     }
 }

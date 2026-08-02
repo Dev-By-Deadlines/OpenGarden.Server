@@ -15,7 +15,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         //         entity.Property(e => e.EnableNotifications).HasDefaultValue(true));
         builder.HasDefaultSchema("identity");
         builder.Entity<TestModel>().ToTable("TestModels", "public");
+        builder.Entity<RefreshToken>().ToTable("RefreshTokens", "identity");
     }
 
     public DbSet<TestModel> TestModels { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 }
