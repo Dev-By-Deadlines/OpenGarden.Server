@@ -10,6 +10,7 @@ using StarterKit.Api.Data;
 using StarterKit.Api.Endpoints;
 using StarterKit.Api.Jobs;
 using StarterKit.Api.Services;
+using FluentValidation;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -62,7 +63,14 @@ try
                 .UseNodaTime()));
     // o.MapEnum<Mood>("mood") later for using postgres enums.
 
-    builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 8;
+            })
         .AddEntityFrameworkStores<AppDbContext>();
 
     builder.Services.AddAuthentication(options =>
@@ -93,6 +101,7 @@ try
     builder.Services.AddOpenApi();
     builder.Services.AddScoped<TokenProvider>();
     builder.Services.AddHostedService<ExpiredTokenCleanupJob>();
+    builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
     var app = builder.Build();
     app.UseSerilogRequestLogging();
@@ -125,9 +134,9 @@ try
         }
     }
 
-    app.MapEndpoints();
     app.UseAuthentication();
     app.UseAuthorization();
+    app.MapEndpoints();
     app.Run();
 }
 catch (Exception ex)

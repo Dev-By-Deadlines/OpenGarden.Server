@@ -16,9 +16,12 @@ No test project exists. No linter or formatter configured beyond .NET defaults.
 ```
 Program.cs                    — entry point, wires everything
 Endpoints/StarterEndpoints.cs — route definitions (group: /app)
-Endpoints/Handlers/           — handler classes (Register, Login)
+Endpoints/Handlers/           — handler classes (Register, Login, RefreshToken, Logout)
+Services/TokenProvider.cs     — JWT access token + refresh token generation
+Extensions/                   — HttpContext extension methods (cookie helpers)
+Jobs/                         — BackgroundService implementations (expired token cleanup)
 Data/AppDbContext.cs           — IdentityDbContext, schema: "identity"
-Models/                        — ApplicationUser, TestModel
+Models/                        — ApplicationUser, TestModel, RefreshToken
 Dtos/                          — plain records (no validation)
 Constants/Roles.cs             — "Admin", "Member"
 Migrations/                    — EF Core migrations (auto-applied on startup)
@@ -29,7 +32,8 @@ Migrations/                    — EF Core migrations (auto-applied on startup)
 - **Migrations auto-apply**: `Program.cs` calls `db.Database.Migrate()` on startup. Don't manually run migrations unless debugging.
 - **JWT secret required**: `Jwt:SecretKey` must be set in user secrets or env vars. Not in `appsettings.json`. App will throw on login without it.
 - **No request validation**: DTOs are bare records. FluentValidation not yet added.
-- **No refresh tokens**: Only short-lived access tokens (2 min). Refresh token flow not implemented.
+- **HttpOnly cookies**: Both access token (2 min) and refresh token (7 days) are stored as HttpOnly cookies. JWT Bearer reads access token from cookie via `OnMessageReceived`.
+- **Expired token cleanup**: `ExpiredTokenCleanupJob` runs hourly to purge expired refresh tokens from DB.
 - **Scalar, not Swagger**: API docs at `/docs` in dev mode via Scalar.
 - **Schema split**: Identity tables in `identity` schema, domain tables in `public`.
 - **Secrets excluded from git**: `appsettings.Development.json` and `appsettings.Local.json` are gitignored.
@@ -46,6 +50,6 @@ Migrations/                    — EF Core migrations (auto-applied on startup)
 ## Remaining roadmap
 
 - [ ] Request validation (FluentValidation)
-- [ ] Refresh token flow
+- [x] Refresh token flow
 - [ ] Health endpoint (`/health`)
 - [ ] Better error handling / result pattern

@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using StarterKit.Api.Constants;
 using StarterKit.Api.Data;
@@ -10,8 +11,15 @@ public class RegisterHandler
     public static async Task<IResult> Handler(
             RegisterDto registerDto,
             AppDbContext dbContext,
-            UserManager<ApplicationUser> UserManager)
+            UserManager<ApplicationUser> UserManager,
+            IValidator<RegisterDto> validator)
     {
+        var validationResult = await validator.ValidateAsync(registerDto);
+        if (!validationResult.IsValid)
+        {
+            return Results.ValidationProblem(validationResult.ToDictionary());
+        }
+
         using var transaction = await dbContext.Database.BeginTransactionAsync();
 
         var user = new ApplicationUser
