@@ -11,6 +11,7 @@ using StarterKit.Api.Endpoints;
 using StarterKit.Api.Jobs;
 using StarterKit.Api.Services;
 using FluentValidation;
+using System.Diagnostics;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -104,6 +105,16 @@ try
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
     var app = builder.Build();
+
+    app.Use(async (ctx, next) =>
+    {
+        var start = Stopwatch.GetTimestamp();
+        await next();
+        var elapsed = Stopwatch.GetElapsedTime(start);
+
+        Console.WriteLine($"Request took {elapsed}");
+    });
+
     app.UseSerilogRequestLogging();
     app.UseCors();
     app.UseRateLimiter();
