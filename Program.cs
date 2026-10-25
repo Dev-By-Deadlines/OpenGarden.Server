@@ -12,6 +12,7 @@ using OpenGarden.Server.Jobs;
 using OpenGarden.Server.Services;
 using FluentValidation;
 using System.Diagnostics;
+using Microsoft.AspNetCore.SignalR;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -102,6 +103,7 @@ try
     builder.Services.AddOpenApi();
     builder.Services.AddScoped<TokenProvider>();
     builder.Services.AddHostedService<ExpiredTokenCleanupJob>();
+    builder.Services.AddSignalR();
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
     var app = builder.Build();
