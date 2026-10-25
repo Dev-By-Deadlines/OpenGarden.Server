@@ -4,7 +4,7 @@ using NodaTime;
 
 #nullable disable
 
-namespace StarterKit.Api.Migrations
+namespace OpenGarden.Server.Migrations
 {
     /// <inheritdoc />
     public partial class CreateRefreshTokens : Migration

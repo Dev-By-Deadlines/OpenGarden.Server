@@ -1,7 +1,7 @@
 using System.Security.Claims;
-using StarterKit.Api.Endpoints.Handlers;
+using OpenGarden.Server.Endpoints.Handlers;
 
-namespace StarterKit.Api.Endpoints;
+namespace OpenGarden.Server.Endpoints;
 
 public static class StarterEndpoints
 {

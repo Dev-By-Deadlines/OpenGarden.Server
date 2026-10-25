@@ -1,4 +1,4 @@
-# Contributing to StarterKit.Api
+# Contributing to OpenGarden.Server
 
 This is a **personal-use template project** — these are internal guidelines, not an open-source policy.
 

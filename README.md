@@ -1,4 +1,4 @@
-# StarterKit.Api
+# OpenGarden.Server
 
 A minimal ASP.NET Core API starter focused on authentication and the infrastructure commonly needed by a new backend.
 

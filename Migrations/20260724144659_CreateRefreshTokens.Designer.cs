@@ -6,11 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using StarterKit.Api.Data;
+using OpenGarden.Server.Data;
 
 #nullable disable
 
-namespace StarterKit.Api.Migrations
+namespace OpenGarden.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260724144659_CreateRefreshTokens")]
@@ -159,7 +159,7 @@ namespace StarterKit.Api.Migrations
                     b.ToTable("AspNetUserTokens", "identity");
                 });
 
-            modelBuilder.Entity("StarterKit.Api.Data.ApplicationUser", b =>
+            modelBuilder.Entity("OpenGarden.Server.Data.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -223,7 +223,7 @@ namespace StarterKit.Api.Migrations
                     b.ToTable("AspNetUsers", "identity");
                 });
 
-            modelBuilder.Entity("StarterKit.Api.Models.RefreshToken", b =>
+            modelBuilder.Entity("OpenGarden.Server.Models.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -249,7 +249,7 @@ namespace StarterKit.Api.Migrations
                     b.ToTable("RefreshTokens", "identity");
                 });
 
-            modelBuilder.Entity("StarterKit.Api.Models.TestModel", b =>
+            modelBuilder.Entity("OpenGarden.Server.Models.TestModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -277,7 +277,7 @@ namespace StarterKit.Api.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("StarterKit.Api.Data.ApplicationUser", null)
+                    b.HasOne("OpenGarden.Server.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -286,7 +286,7 @@ namespace StarterKit.Api.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("StarterKit.Api.Data.ApplicationUser", null)
+                    b.HasOne("OpenGarden.Server.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -301,7 +301,7 @@ namespace StarterKit.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StarterKit.Api.Data.ApplicationUser", null)
+                    b.HasOne("OpenGarden.Server.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -310,16 +310,16 @@ namespace StarterKit.Api.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("StarterKit.Api.Data.ApplicationUser", null)
+                    b.HasOne("OpenGarden.Server.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StarterKit.Api.Models.RefreshToken", b =>
+            modelBuilder.Entity("OpenGarden.Server.Models.RefreshToken", b =>
                 {
-                    b.HasOne("StarterKit.Api.Data.ApplicationUser", "ApplicationUser")
+                    b.HasOne("OpenGarden.Server.Data.ApplicationUser", "ApplicationUser")
                         .WithMany()
                         .HasForeignKey("ApplicationUserId");
 

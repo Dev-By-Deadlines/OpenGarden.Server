@@ -1,10 +1,10 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
-using StarterKit.Api.Constants;
-using StarterKit.Api.Data;
-using StarterKit.Api.Dtos;
+using OpenGarden.Server.Constants;
+using OpenGarden.Server.Data;
+using OpenGarden.Server.Dtos;
 
-namespace StarterKit.Api.Endpoints.Handlers;
+namespace OpenGarden.Server.Endpoints.Handlers;
 
 public class RegisterHandler
 {

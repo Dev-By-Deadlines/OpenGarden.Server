@@ -1,4 +1,4 @@
-namespace StarterKit.Api.Extensions;
+namespace OpenGarden.Server.Extensions;
 
 public static class HttpContextExtensions
 {

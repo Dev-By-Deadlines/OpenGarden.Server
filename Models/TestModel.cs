@@ -1,4 +1,4 @@
-namespace StarterKit.Api.Models;
+namespace OpenGarden.Server.Models;
 
 public class TestModel
 {

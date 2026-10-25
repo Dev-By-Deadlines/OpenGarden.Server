@@ -3,9 +3,9 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using StarterKit.Api.Data;
+using OpenGarden.Server.Data;
 
-namespace StarterKit.Api.Services;
+namespace OpenGarden.Server.Services;
 
 public class TokenProvider
 {

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
-using StarterKit.Api.Data;
+using OpenGarden.Server.Data;
 
-namespace StarterKit.Api.Jobs;
+namespace OpenGarden.Server.Jobs;
 
 public class ExpiredTokenCleanupJob : BackgroundService
 {

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using StarterKit.Api.Data;
-using StarterKit.Api.Extensions;
+using OpenGarden.Server.Data;
+using OpenGarden.Server.Extensions;
 
-namespace StarterKit.Api.Endpoints.Handlers;
+namespace OpenGarden.Server.Endpoints.Handlers;
 
 public class LogoutHandler
 {

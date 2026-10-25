@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using StarterKit.Api.Models;
+using OpenGarden.Server.Models;
 
-namespace StarterKit.Api.Data.Configuration;
+namespace OpenGarden.Server.Data.Configuration;
 
 public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 {

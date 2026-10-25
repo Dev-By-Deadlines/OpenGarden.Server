@@ -1,7 +1,7 @@
 using NodaTime;
-using StarterKit.Api.Data;
+using OpenGarden.Server.Data;
 
-namespace StarterKit.Api.Models;
+namespace OpenGarden.Server.Models;
 
 public class RefreshToken
 {

@@ -1,4 +1,4 @@
-namespace StarterKit.Api.Constants;
+namespace OpenGarden.Server.Constants;
 
 public static class Roles
 {

@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
-using StarterKit.Api.Data;
-using StarterKit.Api.Extensions;
-using StarterKit.Api.Models;
-using StarterKit.Api.Services;
+using OpenGarden.Server.Data;
+using OpenGarden.Server.Extensions;
+using OpenGarden.Server.Models;
+using OpenGarden.Server.Services;
 
-namespace StarterKit.Api.Endpoints.Handlers;
+namespace OpenGarden.Server.Endpoints.Handlers;
 
 public class RefreshTokenHandler
 {

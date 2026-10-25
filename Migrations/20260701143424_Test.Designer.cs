@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using StarterKit.Api.Data;
+using OpenGarden.Server.Data;
 
 #nullable disable
 
-namespace StarterKit.Api.Migrations
+namespace OpenGarden.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260701143424_Test")]
@@ -24,7 +24,7 @@ namespace StarterKit.Api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("StarterKit.Api.Models.TestModel", b =>
+            modelBuilder.Entity("OpenGarden.Server.Models.TestModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

@@ -1,7 +1,7 @@
 using FluentValidation;
-using StarterKit.Api.Dtos;
+using OpenGarden.Server.Dtos;
 
-namespace StarterKit.Api.Validators;
+namespace OpenGarden.Server.Validators;
 
 public class RegisterValidator : AbstractValidator<RegisterDto>
 {

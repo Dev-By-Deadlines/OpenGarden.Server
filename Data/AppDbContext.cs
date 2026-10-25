@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using StarterKit.Api.Models;
+using OpenGarden.Server.Models;
 
-namespace StarterKit.Api.Data;
+namespace OpenGarden.Server.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options)
     : IdentityDbContext<ApplicationUser>(options)

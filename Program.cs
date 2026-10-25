@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
-using StarterKit.Api.Constants;
-using StarterKit.Api.Data;
-using StarterKit.Api.Endpoints;
-using StarterKit.Api.Jobs;
-using StarterKit.Api.Services;
+using OpenGarden.Server.Constants;
+using OpenGarden.Server.Data;
+using OpenGarden.Server.Endpoints;
+using OpenGarden.Server.Jobs;
+using OpenGarden.Server.Services;
 using FluentValidation;
 using System.Diagnostics;
 
@@ -20,7 +20,7 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .WriteTo.File(
-            "/var/log/starter.log",
+            "/var/log/opengarden.log",
             rollingInterval: RollingInterval.Day,
             retainedFileCountLimit: 7)
     .CreateLogger();
@@ -123,7 +123,7 @@ try
         app.MapOpenApi();
         app.MapScalarApiReference("/docs", options =>
                 options
-                .WithTitle("Template API")
+                .WithTitle("OpenGarden API")
                 .WithTheme(ScalarTheme.Saturn)
                 .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.Fetch)
                 );

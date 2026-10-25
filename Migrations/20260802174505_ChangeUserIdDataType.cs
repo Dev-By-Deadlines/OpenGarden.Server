@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace StarterKit.Api.Migrations
+namespace OpenGarden.Server.Migrations
 {
     /// <inheritdoc />
     public partial class ChangeUserIdDataType : Migration

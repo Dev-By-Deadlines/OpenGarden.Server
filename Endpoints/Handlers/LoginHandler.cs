@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using NodaTime;
-using StarterKit.Api.Data;
-using StarterKit.Api.Dtos;
-using StarterKit.Api.Extensions;
-using StarterKit.Api.Models;
-using StarterKit.Api.Services;
+using OpenGarden.Server.Data;
+using OpenGarden.Server.Dtos;
+using OpenGarden.Server.Extensions;
+using OpenGarden.Server.Models;
+using OpenGarden.Server.Services;
 
-namespace StarterKit.Api.Endpoints.Handlers;
+namespace OpenGarden.Server.Endpoints.Handlers;
 
 public class LoginHandler
 {

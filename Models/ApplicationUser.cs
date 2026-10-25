@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace StarterKit.Api.Data;
+namespace OpenGarden.Server.Data;
 
 public sealed class ApplicationUser : IdentityUser
 {
