@@ -2,11 +2,11 @@ services:
   # ── PostgreSQL ────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
-    container_name: starter_postgres
+    container_name: garden_postgres
     environment:
       POSTGRES_USER: app
       POSTGRES_PASSWORD: app
-      POSTGRES_DB: app
+      POSTGRES_DB: garden
     ports:
       - "5432:5432"
     volumes:
