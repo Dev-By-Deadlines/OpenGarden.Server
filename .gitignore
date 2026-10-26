@@ -1,6 +1,6 @@
 ## .NET
-bin/
-obj/
+**/bin/
+**/obj/
 *.user
 *.suo
 
@@ -11,12 +11,14 @@ obj/
 
 ## Logs
 logs/
+**/logs/
 *.log
 
 ## Environment / secrets
 appsettings.Development.json
 appsettings.Local.json
 .env
+.env.*
 
 ## Editor
 .vs/
@@ -30,4 +32,4 @@ Thumbs.db
 
 ## Publish
 publish/
-AGENTS.md
+**/publish/
