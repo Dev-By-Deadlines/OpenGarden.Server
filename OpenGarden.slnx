@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="OpenGarden.Server.Tests/OpenGarden.Server.Tests.csproj" />
+  <Project Path="OpenGarden.Server/OpenGarden.Server.csproj" />
+</Solution>

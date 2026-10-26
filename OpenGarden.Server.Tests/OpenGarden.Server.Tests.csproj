@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OpenGarden.Server.csproj" />
+    <ProjectReference Include="..\OpenGarden.Server\OpenGarden.Server.csproj" />
   </ItemGroup>
 
 </Project>
