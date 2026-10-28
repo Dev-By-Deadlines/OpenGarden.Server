@@ -14,10 +14,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         // builder.Entity<ApplicationUser>(entity =>
         //         entity.Property(e => e.EnableNotifications).HasDefaultValue(true));
         builder.HasDefaultSchema("identity");
-        builder.Entity<TestModel>().ToTable("TestModels", "public");
         builder.Entity<RefreshToken>().ToTable("RefreshTokens", "identity");
+
+        builder.Entity<Plant>().HasKey(p => new { p.X, p.Y });
+        builder.Entity<PlantType>().Property(t => t.Id).ValueGeneratedNever();
     }
 
-    public DbSet<TestModel> TestModels { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<Plant> Plants => Set<Plant>();
+    public DbSet<PlantType> PlantTypes => Set<PlantType>();
 }
