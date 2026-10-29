@@ -23,6 +23,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/) loosely:
 | `chore` | Build scripts, tooling, `.gitignore`, etc. |
 | `deps` | Adding / updating / removing NuGet packages |
 | `config` | Changing `appsettings*.json`, launch profiles, or cfg behavior |
+| `test` | Adding or changing tests only, with no production code change |
 
 ### Examples
 
