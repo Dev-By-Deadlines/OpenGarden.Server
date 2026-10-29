@@ -16,8 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         builder.HasDefaultSchema("identity");
         builder.Entity<RefreshToken>().ToTable("RefreshTokens", "identity");
 
-        builder.Entity<Plant>().HasKey(p => new { p.X, p.Y });
-        builder.Entity<PlantType>().Property(t => t.Id).ValueGeneratedNever();
+        builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }

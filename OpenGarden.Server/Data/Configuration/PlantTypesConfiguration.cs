@@ -4,10 +4,12 @@ using OpenGarden.Server.Models;
 
 namespace OpenGarden.Server.Data.Configuration;
 
-public sealed class PlantTypeConfiguration : IEntityTypeConfiguration<PlantType>
+public sealed class PlantTypesConfiguration : IEntityTypeConfiguration<PlantType>
 {
     public void Configure(EntityTypeBuilder<PlantType> builder)
     {
+        builder.Property(t => t.Id).ValueGeneratedNever();
+        builder.ToTable("PlantTypes", "public");
         builder.HasData(
             new PlantType { Id = 1, Name = "Red" },
             new PlantType { Id = 2, Name = "Orange" },
