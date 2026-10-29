@@ -13,6 +13,7 @@ using OpenGarden.Server.Services;
 using FluentValidation;
 using System.Diagnostics;
 using Microsoft.AspNetCore.SignalR;
+using OpenGarden.Server.Hubs;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -150,6 +151,7 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapEndpoints();
+    app.MapHub<GameHub>("/hubs/game");
     app.Run();
 }
 catch (Exception ex)
@@ -160,3 +162,5 @@ finally
 {
     Log.CloseAndFlush();
 }
+
+public partial class Program { }
