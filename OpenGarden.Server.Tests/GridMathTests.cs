@@ -33,4 +33,16 @@ public class GridMathTests
         var bounds = GridMath.GetCellBoundsAroundChunk(new ChunkCoord(cx, cy));
         Assert.Equal(new CellBounds(minX, maxX, minY, maxY), bounds);
     }
+
+    [Theory]
+    [InlineData(0, 0, true)]
+    [InlineData(LastCell, LastCell, true)]
+    [InlineData(-1, 0, false)]
+    [InlineData(0, -1, false)]
+    [InlineData(GameConstants.MapSize, 0, false)]
+    [InlineData(0, GameConstants.MapSize, false)]
+    public void IsInWorldBounds_OnlyAcceptsCellsInsideTheMap(int x, int y, bool expected)
+    {
+        Assert.Equal(expected, GridMath.IsInWorldBounds(x, y));
+    }
 }
