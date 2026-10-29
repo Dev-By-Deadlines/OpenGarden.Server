@@ -12,7 +12,6 @@ using OpenGarden.Server.Jobs;
 using OpenGarden.Server.Services;
 using FluentValidation;
 using System.Diagnostics;
-using Microsoft.AspNetCore.SignalR;
 using OpenGarden.Server.Hubs;
 
 // Serilog
