@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using OpenGarden.Server.Data;
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.AspNetCore.Http.Connections;
 
 namespace OpenGarden.Server.Tests;
 
@@ -37,5 +39,16 @@ public class OpenGardenWebApplicationFactory : WebApplicationFactory<Program>, I
             services.AddDbContextPool<AppDbContext>(options =>
                 options.UseNpgsql(_postgres.GetConnectionString(), npgsql => npgsql.UseNodaTime()));
         });
+    }
+
+    public HubConnection CreateHubConnection()
+    {
+        return new HubConnectionBuilder()
+            .WithUrl("http://localhost/hubs/game", options =>
+            {
+                options.HttpMessageHandlerFactory = _ => Server.CreateHandler();
+                options.Transports = HttpTransportType.LongPolling;
+            })
+            .Build();
     }
 }
