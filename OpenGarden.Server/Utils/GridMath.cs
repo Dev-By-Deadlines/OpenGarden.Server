@@ -28,4 +28,10 @@ public static class GridMath
             MinY: minChunkY * GameConstants.ChunkSize,
             MaxY: (maxChunkY + 1) * GameConstants.ChunkSize - 1);
     }
+
+    public static bool IsInWorldBounds(int cellX, int cellY)
+    {
+        return cellX >= 0 && cellX < GameConstants.MapSize
+            && cellY >= 0 && cellY < GameConstants.MapSize;
+    }
 }
