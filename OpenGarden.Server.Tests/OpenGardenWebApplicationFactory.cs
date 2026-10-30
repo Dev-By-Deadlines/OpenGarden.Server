@@ -40,7 +40,7 @@ public class OpenGardenWebApplicationFactory : WebApplicationFactory<Program>, I
                 options.UseNpgsql(_postgres.GetConnectionString(), npgsql => npgsql.UseNodaTime()));
         });
 
-        builder.UseSetting("Jwt:Key", "test-only-signing-key-at-least-32-chars-long!");
+        builder.UseSetting("Jwt:SecretKey", "test-only-signing-key-at-least-32-chars-long!");
     }
 
     public HubConnection CreateHubConnection()
