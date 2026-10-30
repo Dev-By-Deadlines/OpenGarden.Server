@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
 using Npgsql;
+using OpenGarden.Server.Constants;
 using OpenGarden.Server.Data;
 using OpenGarden.Server.Dtos;
 using OpenGarden.Server.Models;
@@ -11,10 +13,12 @@ namespace OpenGarden.Server.Hubs;
 public class GameHub : Hub
 {
     private readonly AppDbContext _dbContext;
+    private readonly IClock _clock;
 
-    public GameHub(AppDbContext dbContext)
+    public GameHub(AppDbContext dbContext, IClock clock)
     {
         _dbContext = dbContext;
+        _clock = clock;
     }
 
     public async Task<LoadResultDto> LoadNearbyObjects(int chunkX, int chunkY)
@@ -36,14 +40,18 @@ public class GameHub : Hub
 
     public async Task<PlantResultDto> Plant(short plantTypeId, int cellX, int cellY)
     {
-        if (!await _dbContext.PlantTypes.Select(p => p.Id).ContainsAsync(plantTypeId))
+        if (!GridMath.IsInWorldBounds(cellX, cellY))
+            return new PlantResultDto(ActionOutcome.OutOfBounds);
+
+        if (!await _dbContext.PlantTypes.AnyAsync(t => t.Id == plantTypeId))
             return new PlantResultDto(ActionOutcome.UnknownPlantType);
 
-        await _dbContext.Plants.AddAsync(new Plant()
+        _dbContext.Plants.Add(new Plant()
         {
             PlantTypeId = plantTypeId,
             X = cellX,
-            Y = cellY
+            Y = cellY,
+            RipeAt = _clock.GetCurrentInstant() + Duration.FromSeconds(GameConstants.GrowthTimeSeconds)
         });
 
         try

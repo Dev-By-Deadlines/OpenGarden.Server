@@ -13,6 +13,7 @@ using OpenGarden.Server.Services;
 using FluentValidation;
 using System.Diagnostics;
 using OpenGarden.Server.Hubs;
+using NodaTime;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -105,6 +106,7 @@ try
     builder.Services.AddHostedService<ExpiredTokenCleanupJob>();
     builder.Services.AddSignalR();
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+    builder.Services.AddSingleton<IClock>(SystemClock.Instance);
 
     var app = builder.Build();
 
