@@ -12,10 +12,23 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      test: ["CMD-SHELL", "pg_isready -U app -d garden"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  # ── Game server ───────────────────────────────────────
+  server:
+    build:
+      context: .
+      dockerfile: OpenGarden.Server/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5000:8080"
+    environment:
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=garden;Username=app;Password=app"
 
 volumes:
   postgres_data:
