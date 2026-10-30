@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: garden
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d garden"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    image: ghcr.io/dev-by-deadlines/opengarden-server:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5000:8080"
+    environment:
+      ConnectionStrings__Default: "Host=postgres;Port=5432;Database=garden;Username=app;Password=app"
+      Jwt__SecretKey: "dev-only-key-for-local-compose-at-least-32-chars"
+
+volumes:
+  postgres_data:
