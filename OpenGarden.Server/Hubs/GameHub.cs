@@ -21,6 +21,17 @@ public class GameHub : Hub
         _clock = clock;
     }
 
+    public async Task<GameConfigDto> GetGameConfig()
+    {
+        return new GameConfigDto(
+                GameConstants.MapSize,
+                GameConstants.ChunkSize,
+                GameConstants.HarvestCost,
+                GameConstants.PlantCost,
+                GameConstants.GrowthTimeSeconds,
+                _clock.GetCurrentInstant().ToUnixTimeMilliseconds());
+    }
+
     public async Task<LoadResultDto> LoadNearbyObjects(int chunkX, int chunkY)
     {
         var cellBounds = GridMath.GetCellBoundsAroundChunk(new ChunkCoord(chunkX, chunkY));
