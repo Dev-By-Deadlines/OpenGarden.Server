@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using OpenGarden.Server.Data;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.Http.Connections;
+using System.Text.Json.Serialization;
 
 namespace OpenGarden.Server.Tests;
 
@@ -51,6 +52,7 @@ public class OpenGardenWebApplicationFactory : WebApplicationFactory<Program>, I
                 options.HttpMessageHandlerFactory = _ => Server.CreateHandler();
                 options.Transports = HttpTransportType.LongPolling;
             })
+            .AddJsonProtocol(o => o.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
             .Build();
     }
 }

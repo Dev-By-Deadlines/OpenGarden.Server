@@ -14,6 +14,7 @@ using FluentValidation;
 using System.Diagnostics;
 using OpenGarden.Server.Hubs;
 using NodaTime;
+using System.Text.Json.Serialization;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -104,7 +105,9 @@ try
     builder.Services.AddOpenApi();
     builder.Services.AddScoped<TokenProvider>();
     builder.Services.AddHostedService<ExpiredTokenCleanupJob>();
-    builder.Services.AddSignalR();
+    builder.Services.AddSignalR()
+        .AddJsonProtocol(options =>
+                options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
     builder.Services.AddSingleton<IClock>(SystemClock.Instance);
 
