@@ -9,4 +9,5 @@ public enum ActionOutcome
     NotEnoughEnergy,
     OutOfBounds,
     UnknownPlantType,
+    CellEmpty,
 }

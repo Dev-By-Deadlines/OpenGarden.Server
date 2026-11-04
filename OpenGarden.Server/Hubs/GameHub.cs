@@ -76,4 +76,16 @@ public class GameHub : Hub
 
         return new PlantResultDto(ActionOutcome.Success);
     }
+
+    public async Task<HarvestResultDto> Harvest(int cellX, int cellY)
+    {
+        if (!GridMath.IsInWorldBounds(cellX, cellY))
+            return new HarvestResultDto(ActionOutcome.OutOfBounds);
+
+        var deleted = await _dbContext.Plants
+            .Where(p => p.X == cellX && p.Y == cellY)
+            .ExecuteDeleteAsync();
+
+        return new HarvestResultDto(deleted == 1 ? ActionOutcome.Success : ActionOutcome.CellEmpty);
+    }
 }
