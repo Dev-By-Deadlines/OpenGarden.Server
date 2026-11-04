@@ -44,6 +44,7 @@ public class OpenGardenWebApplicationFactory : WebApplicationFactory<Program>, I
         });
 
         builder.UseSetting("Jwt:SecretKey", "test-only-signing-key-at-least-32-chars-long!");
+        builder.UseSetting("RateLimiting:PermitLimit", "100000");
     }
 
     public HubConnection CreateHubConnection()

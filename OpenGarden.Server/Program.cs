@@ -48,7 +48,7 @@ try
                         ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
                         _ => new FixedWindowRateLimiterOptions
                         {
-                            PermitLimit = 100,
+                            PermitLimit = builder.Configuration.GetValue("RateLimiting:PermitLimit", 100),
                             Window = TimeSpan.FromMinutes(1),
                             QueueLimit = 0
                         }));
