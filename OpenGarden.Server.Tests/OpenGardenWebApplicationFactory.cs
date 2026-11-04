@@ -55,4 +55,11 @@ public class OpenGardenWebApplicationFactory : WebApplicationFactory<Program>, I
             .AddJsonProtocol(o => o.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
             .Build();
     }
+
+    public async Task ResetPlantsAsync()
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await db.Plants.ExecuteDeleteAsync();
+    }
 }
