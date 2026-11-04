@@ -12,17 +12,10 @@ namespace OpenGarden.Server.Tests;
 public class LoadNearbyObjectsTests(OpenGardenWebApplicationFactory factory)
     : IClassFixture<OpenGardenWebApplicationFactory>
 {
-    private async Task ResetPlantsAsync()
-    {
-        using var scope = factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await db.Plants.ExecuteDeleteAsync(TestContext.Current.CancellationToken);
-    }
-
     [Fact]
     public async Task EmptyMap_ReturnsNoPlants()
     {
-        await ResetPlantsAsync();
+        await factory.ResetPlantsAsync();
         await using var connection = factory.CreateHubConnection();
         await connection.StartAsync(TestContext.Current.CancellationToken);
 
@@ -51,7 +44,7 @@ public class LoadNearbyObjectsTests(OpenGardenWebApplicationFactory factory)
     [Fact]
     public async Task ReturnsOnlyPlantsInsideTheLoadedArea()
     {
-        await ResetPlantsAsync();
+        await factory.ResetPlantsAsync();
 
         var focus = new ChunkCoord(6, 12);   // far enough from the map edges for a full area
         var area = GridMath.GetCellBoundsAroundChunk(focus);
