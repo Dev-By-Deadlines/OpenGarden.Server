@@ -1,10 +1,6 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using NodaTime;
-using OpenGarden.Server.Data;
 using OpenGarden.Server.Dtos;
-using OpenGarden.Server.Models;
 using OpenGarden.Server.Utils;
 
 namespace OpenGarden.Server.Tests;
@@ -23,22 +19,6 @@ public class LoadNearbyObjectsTests(OpenGardenWebApplicationFactory factory)
             "LoadNearbyObjects", 6, 12, TestContext.Current.CancellationToken);
 
         Assert.Empty(result.Plants);
-    }
-
-    private async Task InsertPlantsAsync(IEnumerable<(int X, int Y)> cells)
-    {
-        using var scope = factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-        db.Plants.AddRange(cells.Select(c => new Plant
-        {
-            X = c.X,
-            Y = c.Y,
-            PlantTypeId = 1,
-            RipeAt = Instant.FromUnixTimeSeconds(0)
-        }));
-
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -62,7 +42,7 @@ public class LoadNearbyObjectsTests(OpenGardenWebApplicationFactory factory)
             (area.MinX, area.MaxY + 1),   // just below
         };
 
-        await InsertPlantsAsync(inside.Concat(outside));
+        await factory.InsertPlantsAsync(inside.Concat(outside));
 
         await using var connection = factory.CreateHubConnection();
         await connection.StartAsync(TestContext.Current.CancellationToken);

@@ -9,6 +9,8 @@ using OpenGarden.Server.Data;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.Http.Connections;
 using System.Text.Json.Serialization;
+using OpenGarden.Server.Models;
+using NodaTime;
 
 namespace OpenGarden.Server.Tests;
 
@@ -61,5 +63,21 @@ public class OpenGardenWebApplicationFactory : WebApplicationFactory<Program>, I
         using var scope = Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Plants.ExecuteDeleteAsync();
+    }
+
+    public async Task InsertPlantsAsync(IEnumerable<(int X, int Y)> cells)
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        db.Plants.AddRange(cells.Select(c => new Plant
+        {
+            X = c.X,
+            Y = c.Y,
+            PlantTypeId = 1,
+            RipeAt = Instant.FromUnixTimeSeconds(0)
+        }));
+
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
     }
 }
