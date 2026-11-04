@@ -51,3 +51,13 @@ A plant is ripe when `ripeAt` (UTC) has passed.
 ```
 
 Outcomes: `Success`, `CellOccupied`, `OutOfBounds`, `UnknownPlantType`.
+
+### `Harvest(cellX, cellY)`
+
+Removes the plant on a cell.
+
+```json
+{ "outcome": "Success" }
+```
+
+Outcomes: `Success`, `CellEmpty`, `OutOfBounds`.
