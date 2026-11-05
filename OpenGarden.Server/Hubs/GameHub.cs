@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Npgsql;
 using OpenGarden.Server.Constants;
+using OpenGarden.Server.Services;
 using OpenGarden.Server.Data;
 using OpenGarden.Server.Dtos;
 using OpenGarden.Server.Models;
@@ -13,12 +14,14 @@ namespace OpenGarden.Server.Hubs;
 public class GameHub : Hub
 {
     private readonly AppDbContext _dbContext;
+    private readonly ClientUpdater _clientUpdater;
     private readonly IClock _clock;
 
-    public GameHub(AppDbContext dbContext, IClock clock)
+    public GameHub(AppDbContext dbContext, IClock clock, ClientUpdater clientUpdater)
     {
         _dbContext = dbContext;
         _clock = clock;
+        _clientUpdater = clientUpdater;
     }
 
     public async Task<GameConfigDto> GetGameConfig()
@@ -57,12 +60,14 @@ public class GameHub : Hub
         if (!await _dbContext.PlantTypes.AnyAsync(t => t.Id == plantTypeId))
             return new PlantResultDto(ActionOutcome.UnknownPlantType);
 
+        var ripeAt = _clock.GetCurrentInstant() + Duration.FromSeconds(GameConstants.GrowthTimeSeconds);
+
         _dbContext.Plants.Add(new Plant()
         {
             PlantTypeId = plantTypeId,
             X = cellX,
             Y = cellY,
-            RipeAt = _clock.GetCurrentInstant() + Duration.FromSeconds(GameConstants.GrowthTimeSeconds)
+            RipeAt = ripeAt
         });
 
         try
@@ -73,6 +78,9 @@ public class GameHub : Hub
         {
             return new PlantResultDto(ActionOutcome.CellOccupied);
         }
+
+        var plant = new PlantDto(cellX, cellY, plantTypeId, ripeAt.ToDateTimeUtc());
+        await _clientUpdater.UpdateAllClients([new CellUpdateDto(cellX, cellY, plant)]);
 
         return new PlantResultDto(ActionOutcome.Success);
     }
@@ -86,6 +94,11 @@ public class GameHub : Hub
             .Where(p => p.X == cellX && p.Y == cellY)
             .ExecuteDeleteAsync();
 
-        return new HarvestResultDto(deleted == 1 ? ActionOutcome.Success : ActionOutcome.CellEmpty);
+        if (deleted == 0)
+            return new HarvestResultDto(ActionOutcome.CellEmpty);
+
+        await _clientUpdater.UpdateAllClients([new CellUpdateDto(cellX, cellY, null)]);
+
+        return new HarvestResultDto(ActionOutcome.Success);
     }
 }
