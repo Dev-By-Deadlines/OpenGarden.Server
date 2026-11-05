@@ -110,6 +110,7 @@ try
                 options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
     builder.Services.AddSingleton<IClock>(SystemClock.Instance);
+    builder.Services.AddSingleton<ClientUpdater>();
 
     var app = builder.Build();
 
