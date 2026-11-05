@@ -61,3 +61,20 @@ Removes the plant on a cell.
 ```
 
 Outcomes: `Success`, `CellEmpty`, `OutOfBounds`.
+
+## Events
+
+### `WorldUpdated`
+
+Sent to every connected client when a plant is planted or harvested. Register the handler before starting the connection.
+
+The payload is an array of cells. `plant` has the same shape as the plants in `LoadNearbyObjects`, and is `null` when the cell is now empty.
+
+```json
+[
+  { "x": 100, "y": 200, "plant": { "x": 100, "y": 200, "plantTypeId": 3, "ripeAt": "2026-11-02T12:00:00Z" } },
+  { "x": 101, "y": 200, "plant": null }
+]
+```
+
+Each entry says what the cell is now: set the cell to it. Applying the same update twice is harmless. The player who made the change receives it too.
