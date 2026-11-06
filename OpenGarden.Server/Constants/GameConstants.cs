@@ -11,5 +11,5 @@ public static class GameConstants
     public const int PlantCost = 5;
     public const int GrowthTimeSeconds = 60;
 
-    public const int SpawnIntervalSeconds = 30;
+    public const int SpawnIntervalSeconds = 60;
 }

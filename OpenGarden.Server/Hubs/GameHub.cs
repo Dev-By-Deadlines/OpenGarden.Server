@@ -1,12 +1,10 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
-using Npgsql;
 using OpenGarden.Server.Constants;
 using OpenGarden.Server.Services;
 using OpenGarden.Server.Data;
 using OpenGarden.Server.Dtos;
-using OpenGarden.Server.Models;
 using OpenGarden.Server.Utils;
 
 namespace OpenGarden.Server.Hubs;
@@ -26,15 +24,15 @@ public class GameHub : Hub
         _plantingService = plantingService;
     }
 
-    public async Task<GameConfigDto> GetGameConfig()
+    public Task<GameConfigDto> GetGameConfig()
     {
-        return new GameConfigDto(
-                GameConstants.MapSize,
-                GameConstants.ChunkSize,
-                GameConstants.HarvestCost,
-                GameConstants.PlantCost,
-                GameConstants.GrowthTimeSeconds,
-                _clock.GetCurrentInstant().ToUnixTimeMilliseconds());
+        return Task.FromResult(new GameConfigDto(
+            GameConstants.MapSize,
+            GameConstants.ChunkSize,
+            GameConstants.HarvestCost,
+            GameConstants.PlantCost,
+            GameConstants.GrowthTimeSeconds,
+            _clock.GetCurrentInstant().ToUnixTimeMilliseconds()));
     }
 
     public async Task<LoadResultDto> LoadNearbyObjects(int chunkX, int chunkY)
