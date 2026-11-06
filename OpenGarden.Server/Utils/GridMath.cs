@@ -29,6 +29,12 @@ public static class GridMath
             MaxY: (maxChunkY + 1) * GameConstants.ChunkSize - 1);
     }
 
+    public static bool IsValidChunk(int chunkX, int chunkY)
+    {
+        return chunkX >= 0 && chunkX < GameConstants.ChunksPerSide
+            && chunkY >= 0 && chunkY < GameConstants.ChunksPerSide;
+    }
+
     public static bool IsInWorldBounds(int cellX, int cellY)
     {
         return cellX >= 0 && cellX < GameConstants.MapSize

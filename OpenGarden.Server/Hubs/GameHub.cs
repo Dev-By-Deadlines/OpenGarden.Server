@@ -37,6 +37,9 @@ public class GameHub : Hub
 
     public async Task<LoadResultDto> LoadNearbyObjects(int chunkX, int chunkY)
     {
+        if (!GridMath.IsValidChunk(chunkX, chunkY))
+            throw new HubException("Chunk is outside the map.");
+
         var cellBounds = GridMath.GetCellBoundsAroundChunk(new ChunkCoord(chunkX, chunkY));
 
         var plants = await _dbContext.Plants
