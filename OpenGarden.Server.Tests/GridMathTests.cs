@@ -45,4 +45,19 @@ public class GridMathTests
     {
         Assert.Equal(expected, GridMath.IsInWorldBounds(x, y));
     }
+
+    [Theory]
+    [InlineData(0, 0, true)]
+    [InlineData(LastChunk, LastChunk, true)]
+    [InlineData(LastChunk, 0, true)]
+    [InlineData(0, LastChunk, true)]
+    [InlineData(-1, 0, false)]
+    [InlineData(0, -1, false)]
+    [InlineData(LastChunk + 1, 0, false)]
+    [InlineData(0, LastChunk + 1, false)]
+    [InlineData(int.MinValue, int.MaxValue, false)]
+    public void IsValidChunk_OnlyAcceptsChunksInsideTheMap(int chunkX, int chunkY, bool expected)
+    {
+        Assert.Equal(expected, GridMath.IsValidChunk(chunkX, chunkY));
+    }
 }
