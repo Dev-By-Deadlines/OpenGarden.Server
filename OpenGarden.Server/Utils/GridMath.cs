@@ -34,4 +34,12 @@ public static class GridMath
         return cellX >= 0 && cellX < GameConstants.MapSize
             && cellY >= 0 && cellY < GameConstants.MapSize;
     }
+
+    public static CellCoord GetRandomCellInChunk(ChunkCoord chunk)
+    {
+        var size = GameConstants.ChunkSize;
+        return new CellCoord(
+            Random.Shared.Next(chunk.X * size, (chunk.X + 1) * size),
+            Random.Shared.Next(chunk.Y * size, (chunk.Y + 1) * size));
+    }
 }
