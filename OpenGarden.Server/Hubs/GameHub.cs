@@ -15,13 +15,15 @@ public class GameHub : Hub
 {
     private readonly AppDbContext _dbContext;
     private readonly ClientUpdater _clientUpdater;
+    private readonly PlantingService _plantingService;
     private readonly IClock _clock;
 
-    public GameHub(AppDbContext dbContext, IClock clock, ClientUpdater clientUpdater)
+    public GameHub(AppDbContext dbContext, IClock clock, ClientUpdater clientUpdater, PlantingService plantingService)
     {
         _dbContext = dbContext;
         _clock = clock;
         _clientUpdater = clientUpdater;
+        _plantingService = plantingService;
     }
 
     public async Task<GameConfigDto> GetGameConfig()
@@ -54,35 +56,7 @@ public class GameHub : Hub
 
     public async Task<PlantResultDto> Plant(short plantTypeId, int cellX, int cellY)
     {
-        if (!GridMath.IsInWorldBounds(cellX, cellY))
-            return new PlantResultDto(ActionOutcome.OutOfBounds);
-
-        if (!await _dbContext.PlantTypes.AnyAsync(t => t.Id == plantTypeId))
-            return new PlantResultDto(ActionOutcome.UnknownPlantType);
-
-        var ripeAt = _clock.GetCurrentInstant() + Duration.FromSeconds(GameConstants.GrowthTimeSeconds);
-
-        _dbContext.Plants.Add(new Plant()
-        {
-            PlantTypeId = plantTypeId,
-            X = cellX,
-            Y = cellY,
-            RipeAt = ripeAt
-        });
-
-        try
-        {
-            await _dbContext.SaveChangesAsync();
-        }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
-        {
-            return new PlantResultDto(ActionOutcome.CellOccupied);
-        }
-
-        var plant = new PlantDto(cellX, cellY, plantTypeId, ripeAt.ToDateTimeUtc());
-        await _clientUpdater.UpdateAllClients([new CellUpdateDto(cellX, cellY, plant)]);
-
-        return new PlantResultDto(ActionOutcome.Success);
+        return new PlantResultDto(await _plantingService.TryPlantAsync(plantTypeId, cellX, cellY));
     }
 
     public async Task<HarvestResultDto> Harvest(int cellX, int cellY)
