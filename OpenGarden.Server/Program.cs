@@ -105,12 +105,17 @@ try
     builder.Services.AddOpenApi();
     builder.Services.AddScoped<TokenProvider>();
     builder.Services.AddHostedService<ExpiredTokenCleanupJob>();
+
+    if (builder.Configuration.GetValue("Spawner:Enabled", true))
+        builder.Services.AddHostedService<PlantSpawnerJob>();
+
     builder.Services.AddSignalR()
         .AddJsonProtocol(options =>
                 options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
     builder.Services.AddSingleton<IClock>(SystemClock.Instance);
     builder.Services.AddSingleton<ClientUpdater>();
+    builder.Services.AddScoped<PlantingService>();
 
     var app = builder.Build();
 
