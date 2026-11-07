@@ -4,27 +4,41 @@ using OpenGarden.Server.Data;
 
 namespace OpenGarden.Server.Jobs;
 
-public class ExpiredTokenCleanupJob : BackgroundService
+public class ExpiredTokenCleanupJob(
+    IServiceScopeFactory scopeFactory,
+    IClock clock,
+    ILogger<ExpiredTokenCleanupJob> logger) : BackgroundService
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly PeriodicTimer _timer;
-
-    public ExpiredTokenCleanupJob(IServiceProvider serviceProvider)
-    {
-        _serviceProvider = serviceProvider;
-        _timer = new PeriodicTimer(TimeSpan.FromHours(1));
-    }
+    private static readonly TimeSpan Interval = TimeSpan.FromHours(1);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (await _timer.WaitForNextTickAsync(stoppingToken))
-        {
-            using var scope = _serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        using var timer = new PeriodicTimer(Interval);
 
-            await dbContext.RefreshTokens
-                .Where(rt => rt.Expires < SystemClock.Instance.GetCurrentInstant())
-                .ExecuteDeleteAsync(stoppingToken);
+        while (await timer.WaitForNextTickAsync(stoppingToken))
+        {
+            try
+            {
+                await DeleteExpiredTokensAsync(stoppingToken);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                logger.LogError(ex, "Expired token cleanup failed");
+            }
         }
+    }
+
+    private async Task DeleteExpiredTokensAsync(CancellationToken ct)
+    {
+        using var scope = scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var now = clock.GetCurrentInstant();
+        var deleted = await dbContext.RefreshTokens
+            .Where(rt => rt.Expires < now)
+            .ExecuteDeleteAsync(ct);
+
+        if (deleted > 0)
+            logger.LogInformation("Deleted {Count} expired refresh tokens", deleted);
     }
 }
