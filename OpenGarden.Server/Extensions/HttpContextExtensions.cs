@@ -9,7 +9,7 @@ public static class HttpContextExtensions
     {
         httpContext.Response.Cookies.Append(AccessTokenCookieName, token, new CookieOptions
         {
-            Secure = false,
+            Secure = true,
             SameSite = SameSiteMode.Strict,
             Path = "/",
             HttpOnly = true,
@@ -21,7 +21,7 @@ public static class HttpContextExtensions
     {
         httpContext.Response.Cookies.Append(RefreshTokenCookieName, token, new CookieOptions
         {
-            Secure = false,
+            Secure = true,
             SameSite = SameSiteMode.Strict,
             Path = "/",
             HttpOnly = true,
@@ -37,6 +37,6 @@ public static class HttpContextExtensions
 
     public static string? GetRefreshToken(this HttpContext httpContext)
     {
-        return httpContext.Request.Cookies["refreshToken"];
+        return httpContext.Request.Cookies[RefreshTokenCookieName];
     }
 }
