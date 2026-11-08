@@ -6,9 +6,11 @@ using OpenGarden.Server.Services;
 using OpenGarden.Server.Data;
 using OpenGarden.Server.Dtos;
 using OpenGarden.Server.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace OpenGarden.Server.Hubs;
 
+[Authorize]
 public class GameHub : Hub
 {
     private readonly AppDbContext _dbContext;
@@ -22,6 +24,15 @@ public class GameHub : Hub
         _clock = clock;
         _clientUpdater = clientUpdater;
         _plantingService = plantingService;
+    }
+
+    public override async Task OnConnectedAsync()
+    {
+        var userId = Context.UserIdentifier;
+
+        Console.WriteLine($"Player connected: {userId}");
+
+        await base.OnConnectedAsync();
     }
 
     public Task<GameConfigDto> GetGameConfig()
