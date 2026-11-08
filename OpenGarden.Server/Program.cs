@@ -152,6 +152,10 @@ try
         {
             await roleManager.CreateAsync(new IdentityRole(Roles.Admin));
         }
+        if (!await roleManager.RoleExistsAsync(Roles.Member))
+        {
+            await roleManager.CreateAsync(new IdentityRole(Roles.Member));
+        }
         if (!await roleManager.RoleExistsAsync(Roles.Guest))
         {
             await roleManager.CreateAsync(new IdentityRole(Roles.Guest));
