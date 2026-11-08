@@ -3,7 +3,7 @@ using OpenGarden.Server.Endpoints.Handlers;
 
 namespace OpenGarden.Server.Endpoints;
 
-public static class StarterEndpoints
+public static class GardenEndpoints
 {
     public static void MapEndpoints(this WebApplication app)
     {
@@ -17,5 +17,6 @@ public static class StarterEndpoints
                 {
                     return Results.Ok(claimsPrincipal.Claims.ToDictionary(c => c.Type, c => c.Value));
                 }).RequireAuthorization();
+        group.MapPost("/guest", GuestHandler.Handler);
     }
 }

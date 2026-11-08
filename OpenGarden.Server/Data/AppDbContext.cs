@@ -18,6 +18,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 
+    public DbSet<Player> Players => Set<Player>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Plant> Plants => Set<Plant>();
     public DbSet<PlantType> PlantTypes => Set<PlantType>();

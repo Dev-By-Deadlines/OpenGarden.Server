@@ -13,7 +13,7 @@ using OpenGarden.Server.Data;
 namespace OpenGarden.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261108075647_InitialMigration")]
+    [Migration("20261108100039_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -176,6 +176,9 @@ namespace OpenGarden.Server.Migrations
                         .HasColumnType("character varying(256)");
 
                     b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsGuest")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("LockoutEnabled")

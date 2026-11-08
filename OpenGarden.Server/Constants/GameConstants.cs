@@ -10,6 +10,7 @@ public static class GameConstants
     public const int HarvestCost = 10;
     public const int PlantCost = 5;
     public const int GrowthTimeSeconds = 60;
+    public const int MaxEnergy = 100;
 
     public const int SpawnIntervalSeconds = 60;
 }
