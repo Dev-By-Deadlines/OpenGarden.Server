@@ -57,7 +57,7 @@ try
                         partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
                         factory: _ => new FixedWindowRateLimiterOptions
                         {
-                            PermitLimit = 1,
+                            PermitLimit = builder.Configuration.GetValue("RateLimiting:GuestCreationPermitLimit", 1),
                             Window = TimeSpan.FromMinutes(1),
                             QueueLimit = 0,
                             AutoReplenishment = true

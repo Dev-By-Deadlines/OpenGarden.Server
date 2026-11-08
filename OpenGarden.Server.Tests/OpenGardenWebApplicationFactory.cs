@@ -45,19 +45,38 @@ public class OpenGardenWebApplicationFactory : WebApplicationFactory<Program>, I
 
         builder.UseSetting("Jwt:SecretKey", "test-only-signing-key-at-least-32-chars-long!");
         builder.UseSetting("RateLimiting:PermitLimit", "100000");
+        builder.UseSetting("RateLimiting:GuestCreationPermitLimit", "100000");
         builder.UseSetting("Spawner:Enabled", "false");
     }
 
     public HubConnection CreateHubConnection()
     {
+        // one guest per connection: Lazy makes sure the endpoint is called only once
+        var token = new Lazy<Task<string>>(CreateGuestAccessTokenAsync);
+
         return new HubConnectionBuilder()
             .WithUrl("http://localhost/hubs/game", options =>
             {
                 options.HttpMessageHandlerFactory = _ => Server.CreateHandler();
                 options.Transports = HttpTransportType.LongPolling;
+                options.AccessTokenProvider = async () => await token.Value;
             })
             .AddJsonProtocol(o => o.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
             .Build();
+    }
+
+    private async Task<string> CreateGuestAccessTokenAsync()
+    {
+        using var client = CreateClient();
+        var response = await client.PostAsync("/api/guest", null);
+        response.EnsureSuccessStatusCode();
+
+        var cookie = response.Headers.GetValues("Set-Cookie")
+            .First(c => c.StartsWith("accessToken="));
+
+        // "accessToken=<jwt>; expires=...; path=/; ..." -> "<jwt>"
+        var value = cookie["accessToken=".Length..].Split(';')[0];
+        return Uri.UnescapeDataString(value);
     }
 
     public async Task ResetPlantsAsync()
