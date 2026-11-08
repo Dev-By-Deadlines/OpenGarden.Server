@@ -14,12 +14,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         // builder.Entity<ApplicationUser>(entity =>
         //         entity.Property(e => e.EnableNotifications).HasDefaultValue(true));
         builder.HasDefaultSchema("identity");
-        builder.Entity<RefreshToken>().ToTable("RefreshTokens", "identity");
 
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Plant> Plants => Set<Plant>();
     public DbSet<PlantType> PlantTypes => Set<PlantType>();
 }

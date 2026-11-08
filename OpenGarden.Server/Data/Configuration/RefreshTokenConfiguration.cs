@@ -8,6 +8,7 @@ public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refresh
 {
     public void Configure(EntityTypeBuilder<RefreshToken> builder)
     {
+        builder.ToTable("RefreshTokens", "identity");
         builder.HasKey(r => r.Id);
 
         builder.Property(r => r.Token).HasMaxLength(200);
