@@ -8,7 +8,9 @@ public class RegisterValidator : AbstractValidator<RegisterDto>
     public RegisterValidator()
     {
         RuleFor(x => x.UserName)
-            .NotEmpty();
+            .NotEmpty()
+            .MinimumLength(2)
+            .MaximumLength(20);
 
         RuleFor(x => x.Password)
             .MinimumLength(8);
