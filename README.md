@@ -11,7 +11,7 @@ A multiplayer browser game in the spirit of r/place, where every pixel is a plan
 - **Server:** .NET, SignalR, PostgreSQL (EF Core)
 - **Tests:** xUnit unit tests and integration tests that run the real app against a Postgres container (Testcontainers)
 - **CI:** GitHub Actions runs the tests on every push and publishes the server image to GitHub Container Registry
-- **Contract:** the hub methods and data shapes are described in [`HUB_CONTRACT.md`](HUB_CONTRACT.md)
+- **Contract:** the hub methods and data shapes are described in [`HUB_CONTRACT.md`](dev/HUB_CONTRACT.md)
 
 ## Run it
 
