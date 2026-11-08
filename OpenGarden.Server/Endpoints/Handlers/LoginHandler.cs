@@ -19,10 +19,13 @@ public class LoginHandler
     {
         var user = await userManager.FindByNameAsync(loginDto.UserName);
 
-        if (user is null || !await userManager.CheckPasswordAsync(user, loginDto.Password))
+        if (user is null ||
+            user.IsGuest ||
+            !await userManager.CheckPasswordAsync(user, loginDto.Password))
         {
             return Results.Unauthorized();
         }
+
         string accessToken = await tokenProvider.CreateAccessToken(user);
 
         var refreshToken = new RefreshToken
