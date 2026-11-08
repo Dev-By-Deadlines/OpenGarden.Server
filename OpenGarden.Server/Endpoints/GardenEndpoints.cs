@@ -24,6 +24,6 @@ public static class GardenEndpoints
             Role = user.FindFirstValue(ClaimTypes.Role)
         })).RequireAuthorization();
 
-        group.MapPost("/guest", GuestHandler.Handler);
+        group.MapPost("/guest", GuestHandler.Handler).RequireRateLimiting("GuestCreation");
     }
 }

@@ -52,13 +52,16 @@ try
                             Window = TimeSpan.FromMinutes(1),
                             QueueLimit = 0
                         }));
-
-            //     Named policy for specific endpoints that need stricter limits
-            // options.AddFixedWindowLimiter("FixedPolicy", opt =>
-            // {
-            //     opt.Window = TimeSpan.FromMinutes(1);
-            //     opt.PermitLimit = 60;
-            // });
+            options.AddPolicy("GuestCreation", httpContext =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 1,
+                            Window = TimeSpan.FromMinutes(1),
+                            QueueLimit = 0,
+                            AutoReplenishment = true
+                        }));
         });
 
     builder.Services.AddDbContextPool<AppDbContext>(opt =>
