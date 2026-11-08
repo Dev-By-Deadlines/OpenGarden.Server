@@ -11,7 +11,7 @@ public class RegisterHandler
     public static async Task<IResult> Handler(
             RegisterDto registerDto,
             AppDbContext dbContext,
-            UserManager<ApplicationUser> UserManager,
+            UserManager<ApplicationUser> userManager,
             IValidator<RegisterDto> validator)
     {
         var validationResult = await validator.ValidateAsync(registerDto);
@@ -24,18 +24,22 @@ public class RegisterHandler
 
         var user = new ApplicationUser
         {
-            UserName = registerDto.Email,
-            Email = registerDto.Email
+            UserName = registerDto.UserName
         };
 
-        var createUserResult = await UserManager.CreateAsync(user, registerDto.Password);
+        var createUserResult = await userManager.CreateAsync(user, registerDto.Password);
 
         if (!createUserResult.Succeeded)
         {
-            return Results.BadRequest(createUserResult.Errors);
+            var errors = createUserResult.Errors.ToArray();
+
+            if (errors.Any(e => e.Code == "DuplicateUserName"))
+                return Results.Conflict(errors);
+
+            return Results.BadRequest(errors);
         }
 
-        var addToRoleResult = await UserManager.AddToRoleAsync(user, Roles.Member);
+        var addToRoleResult = await userManager.AddToRoleAsync(user, Roles.Member);
         if (!addToRoleResult.Succeeded)
         {
             return Results.BadRequest(addToRoleResult.Errors);

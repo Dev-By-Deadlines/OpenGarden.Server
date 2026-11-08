@@ -17,7 +17,7 @@ public class LoginHandler
         TokenProvider tokenProvider,
         HttpContext httpContext)
     {
-        var user = await userManager.FindByEmailAsync(loginDto.Email);
+        var user = await userManager.FindByNameAsync(loginDto.UserName);
 
         if (user is null || !await userManager.CheckPasswordAsync(user, loginDto.Password))
         {

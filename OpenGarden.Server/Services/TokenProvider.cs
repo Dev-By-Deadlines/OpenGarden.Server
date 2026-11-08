@@ -29,7 +29,7 @@ public class TokenProvider
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id),
-            new(JwtRegisteredClaimNames.Email, user.Email!)
+            new(JwtRegisteredClaimNames.UniqueName, user.UserName!)
         };
 
         foreach (var role in roles)
