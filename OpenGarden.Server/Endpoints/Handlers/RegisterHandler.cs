@@ -24,7 +24,8 @@ public class RegisterHandler
 
         var user = new ApplicationUser
         {
-            UserName = registerDto.UserName
+            UserName = registerDto.UserName,
+            IsGuest = false
         };
 
         var createUserResult = await userManager.CreateAsync(user, registerDto.Password);

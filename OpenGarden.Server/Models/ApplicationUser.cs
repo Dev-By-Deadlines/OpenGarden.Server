@@ -4,6 +4,6 @@ namespace OpenGarden.Server.Data;
 
 public sealed class ApplicationUser : IdentityUser
 {
-    // public bool EnableNotifications { get; set; }
+    public bool IsGuest { get; set; } = true;
 }
 
