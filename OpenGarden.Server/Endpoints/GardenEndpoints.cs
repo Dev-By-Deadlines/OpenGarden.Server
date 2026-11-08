@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using OpenGarden.Server.Constants;
 using OpenGarden.Server.Endpoints.Handlers;
 
 namespace OpenGarden.Server.Endpoints;
@@ -15,10 +16,14 @@ public static class GardenEndpoints
         group.MapPost("/login", LoginHandler.Handler);
         group.MapPost("/refresh-token", RefreshTokenHandler.Handler);
         group.MapPost("/logout", LogoutHandler.Handler);
-        group.MapGet("/me", (ClaimsPrincipal claimsPrincipal) =>
-                {
-                    return Results.Ok(claimsPrincipal.Claims.ToDictionary(c => c.Type, c => c.Value));
-                }).RequireAuthorization();
+
+        group.MapGet("/me", (ClaimsPrincipal user) => Results.Ok(new
+        {
+            Id = user.FindFirstValue(ClaimTypes.NameIdentifier),
+            UserName = user.Identity?.Name,
+            Role = user.FindFirstValue(ClaimTypes.Role)
+        })).RequireAuthorization();
+
         group.MapPost("/guest", GuestHandler.Handler);
     }
 }
