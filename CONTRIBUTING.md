@@ -42,7 +42,3 @@ Work directly on `main`. If experimenting with a risky change, branch with a sho
 1. **Build**: `dotnet build`
 2. **Run**: `dotnet run` — confirm the app starts without errors
 3. **Check files**: make sure no sensitive data (connection strings, secrets, JWT keys) are being committed
-
-## Updating the Template
-
-When a feature is complete and stable, update `AGENTS.md` to reflect new packages, endpoints, or configuration so future sessions know the current state.
