@@ -4,6 +4,31 @@ Hub URL: `/hubs/game`. JSON is camelCase, enums are sent as strings.
 
 A cell's chunk is `floor(cell / chunkSize)` on each axis.
 
+## Authentication
+
+The hub only accepts logged-in players. Login is stored in HttpOnly cookies, so the browser sends it by itself, but requests must include credentials (`credentials: "include"` for `fetch`, `withCredentials: true` for the SignalR connection).
+
+Everyone starts as a guest. On page load, before connecting to the hub:
+
+1. `GET /api/me`. If it returns 200, you are logged in, so connect.
+2. On 401, `POST /api/refresh-token`. If it returns 200, connect.
+3. On 401, `POST /api/guest`. It creates a guest player and sets the cookies, then connect.
+
+A connection without a valid login is rejected with 401.
+
+### Endpoints
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/me` | Who am I: `{ "id": "...", "userName": "Guest_...", "role": "Guest" }` |
+| `POST /api/guest` | Create a guest player and log in as them |
+| `POST /api/register` | Turn the current guest into a registered player. Body: `userName`, `password`, `confirmPassword`. The role becomes `Member` |
+| `POST /api/login` | Log in to an existing registered account |
+| `POST /api/refresh-token` | Get a new access token using the refresh cookie |
+| `POST /api/logout` | Log out |
+
+The access token is short-lived. When a request returns 401, call `/api/refresh-token`, then retry. A dropped hub connection should do the same before reconnecting.
+
 ## Plant types
 
 The server sends only `plantTypeId`. The client picks the colors.
