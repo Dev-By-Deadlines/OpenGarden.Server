@@ -119,6 +119,7 @@ try
     builder.Services.AddSingleton<IClock>(SystemClock.Instance);
     builder.Services.AddSingleton<ClientUpdater>();
     builder.Services.AddScoped<PlantingService>();
+    builder.Services.AddScoped<EnergyService>();
 
     var app = builder.Build();
 
