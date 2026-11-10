@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using OpenGarden.Server.Constants;
 using OpenGarden.Server.Data;
 using OpenGarden.Server.Dtos;
 
@@ -32,7 +33,7 @@ public class PlantTests(OpenGardenWebApplicationFactory factory)
         await a.StartAsync(ct);
         await b.StartAsync(ct);
 
-        const int cells = 20;
+        const int cells = GameConstants.GuestMaxEnergy / GameConstants.PlantCost;
         for (int x = 0; x < cells; x++)
         {
             // start both calls before awaiting either one
