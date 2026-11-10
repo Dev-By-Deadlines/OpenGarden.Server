@@ -11,7 +11,7 @@ public sealed class PlayerConfiguration : IEntityTypeConfiguration<Player>
         builder.ToTable("Players", "public");
         builder.HasKey(p => p.Id);
 
-        builder.HasOne<ApplicationUser>()
+        builder.HasOne(p => p.User)
                .WithOne()
                .HasForeignKey<Player>(p => p.Id)
                .OnDelete(DeleteBehavior.Cascade);

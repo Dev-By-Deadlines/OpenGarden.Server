@@ -6,10 +6,10 @@ namespace OpenGarden.Server.Services;
 
 public class EnergyService(IClock clock)
 {
-    public bool TrySpend(Player player, int cost, bool isGuest)
+    public bool TrySpend(Player player, int cost)
     {
-        var max = isGuest ? GameConstants.GuestMaxEnergy : GameConstants.MaxEnergy;
-        var regenSeconds = isGuest ? GameConstants.GuestEnergyRegenSeconds : GameConstants.EnergyRegenSeconds;
+        var max = player.User.IsGuest ? GameConstants.GuestMaxEnergy : GameConstants.MaxEnergy;
+        var regenSeconds = player.User.IsGuest ? GameConstants.GuestEnergyRegenSeconds : GameConstants.EnergyRegenSeconds;
 
         var now = clock.GetCurrentInstant();
         var secondsPassed = (now - player.EnergyUpdatedAt).TotalSeconds;

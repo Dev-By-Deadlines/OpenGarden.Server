@@ -11,21 +11,14 @@ using Microsoft.AspNetCore.Authorization;
 namespace OpenGarden.Server.Hubs;
 
 [Authorize]
-public class GameHub : Hub
+public class GameHub(
+    AppDbContext _dbContext,
+    IClock _clock,
+    ClientUpdater _clientUpdater,
+    PlantingService _plantingService,
+    EnergyService _energyService
+) : Hub
 {
-    private readonly AppDbContext _dbContext;
-    private readonly ClientUpdater _clientUpdater;
-    private readonly PlantingService _plantingService;
-    private readonly IClock _clock;
-
-    public GameHub(AppDbContext dbContext, IClock clock, ClientUpdater clientUpdater, PlantingService plantingService)
-    {
-        _dbContext = dbContext;
-        _clock = clock;
-        _clientUpdater = clientUpdater;
-        _plantingService = plantingService;
-    }
-
     public override async Task OnConnectedAsync()
     {
         var userId = Context.UserIdentifier;
@@ -68,7 +61,8 @@ public class GameHub : Hub
 
     public async Task<PlantResultDto> Plant(short plantTypeId, int cellX, int cellY)
     {
-        return new PlantResultDto(await _plantingService.TryPlantAsync(plantTypeId, cellX, cellY));
+        return new PlantResultDto(await _plantingService
+                .TryPlantAsync(plantTypeId, cellX, cellY, GetPlayerId(), Context.ConnectionAborted));
     }
 
     public async Task<HarvestResultDto> Harvest(int cellX, int cellY)
@@ -87,4 +81,6 @@ public class GameHub : Hub
 
         return new HarvestResultDto(ActionOutcome.Success);
     }
+
+    private string GetPlayerId() => Context.UserIdentifier!;
 }

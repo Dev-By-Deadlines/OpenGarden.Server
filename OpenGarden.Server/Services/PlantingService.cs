@@ -9,12 +9,23 @@ using OpenGarden.Server.Utils;
 
 namespace OpenGarden.Server.Services;
 
-public class PlantingService(AppDbContext db, IClock clock, ClientUpdater clientUpdater)
+public class PlantingService(AppDbContext db, IClock clock, ClientUpdater clientUpdater, EnergyService energyService)
 {
-    public async Task<ActionOutcome> TryPlantAsync(short plantTypeId, int cellX, int cellY, CancellationToken ct = default)
+    public async Task<ActionOutcome> TryPlantAsync(short plantTypeId, int cellX, int cellY, string? playerId = null, CancellationToken ct = default)
     {
         if (!GridMath.IsInWorldBounds(cellX, cellY)) return ActionOutcome.OutOfBounds;
         if (!await db.PlantTypes.AnyAsync(t => t.Id == plantTypeId, ct)) return ActionOutcome.UnknownPlantType;
+
+        if (playerId is not null)
+        {
+            var player = await db.Players
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Id == playerId, ct);
+            if (player is null) return ActionOutcome.UnknownPlayer;
+
+            if (!energyService.TrySpend(player, GameConstants.PlantCost))
+                return ActionOutcome.NotEnoughEnergy;
+        }
 
         var ripeAt = clock.GetCurrentInstant() + Duration.FromSeconds(GameConstants.GrowthTimeSeconds);
         db.Plants.Add(new Plant { PlantTypeId = plantTypeId, X = cellX, Y = cellY, RipeAt = ripeAt });

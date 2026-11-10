@@ -37,7 +37,7 @@ public class PlantSpawnerJob(IServiceScopeFactory scopeFactory, ILogger<PlantSpa
         var cell = GridMath.GetRandomCellInChunk(chunk.Value);
         var typeId = await GetRandomPlantType(db, ct);
 
-        var outcome = await plantingService.TryPlantAsync(typeId, cell.X, cell.Y, ct);
+        var outcome = await plantingService.TryPlantAsync(typeId, cell.X, cell.Y, ct: ct);
         if (outcome != ActionOutcome.Success)
             logger.LogInformation("Spawn at {Cell} skipped: {Outcome}", cell, outcome);
     }
