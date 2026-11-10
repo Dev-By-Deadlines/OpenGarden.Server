@@ -120,6 +120,7 @@ try
     builder.Services.AddSingleton<ClientUpdater>();
     builder.Services.AddScoped<PlantingService>();
     builder.Services.AddScoped<EnergyService>();
+    builder.Services.AddScoped<HarvestService>();
 
     var app = builder.Build();
 

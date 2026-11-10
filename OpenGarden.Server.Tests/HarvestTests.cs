@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using OpenGarden.Server.Constants;
 using OpenGarden.Server.Data;
 using OpenGarden.Server.Dtos;
 
@@ -48,7 +49,7 @@ public class HarvestTests(OpenGardenWebApplicationFactory factory)
         var ct = TestContext.Current.CancellationToken;
         await factory.ResetPlantsAsync();
 
-        const int cells = 20;
+        const int cells = GameConstants.GuestMaxEnergy / GameConstants.HarvestCost;
         await factory.InsertPlantsAsync(Enumerable.Range(0, cells).Select(x => (x, 0)));
 
         await using var a = factory.CreateHubConnection();

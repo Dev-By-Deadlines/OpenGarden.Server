@@ -14,9 +14,8 @@ namespace OpenGarden.Server.Hubs;
 public class GameHub(
     AppDbContext _dbContext,
     IClock _clock,
-    ClientUpdater _clientUpdater,
     PlantingService _plantingService,
-    EnergyService _energyService
+    HarvestService _harvestService
 ) : Hub
 {
     public override async Task OnConnectedAsync()
@@ -67,19 +66,8 @@ public class GameHub(
 
     public async Task<HarvestResultDto> Harvest(int cellX, int cellY)
     {
-        if (!GridMath.IsInWorldBounds(cellX, cellY))
-            return new HarvestResultDto(ActionOutcome.OutOfBounds);
-
-        var deleted = await _dbContext.Plants
-            .Where(p => p.X == cellX && p.Y == cellY)
-            .ExecuteDeleteAsync();
-
-        if (deleted == 0)
-            return new HarvestResultDto(ActionOutcome.CellEmpty);
-
-        await _clientUpdater.UpdateAllClients([new CellUpdateDto(cellX, cellY, null)]);
-
-        return new HarvestResultDto(ActionOutcome.Success);
+        return new HarvestResultDto(await _harvestService
+            .TryHarvestAsync(cellX, cellY, GetPlayerId(), Context.ConnectionAborted));
     }
 
     private string GetPlayerId() => Context.UserIdentifier!;
