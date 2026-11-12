@@ -68,4 +68,35 @@ public class HarvestTests(OpenGardenWebApplicationFactory factory)
             Assert.Single(results, r => r.Outcome == ActionOutcome.CellEmpty);
         }
     }
+
+    [Fact]
+    public async Task Harvest_WhenEnergyIsInsufficient_ReturnsNotEnoughEnergy()
+    {
+        var ct = TestContext.Current.CancellationToken;
+
+        await factory.ResetPlantsAsync();
+
+        await using var client = factory.CreateHubConnection();
+        await client.StartAsync(ct);
+
+        var maxHarvestCount =
+            GameConstants.GuestMaxEnergy / GameConstants.HarvestCost;
+
+        for (int x = 0; x < maxHarvestCount; x++)
+        {
+            await factory.InsertPlantsAsync([(0, 0)]);
+
+            var result = await client.InvokeAsync<HarvestResultDto>(
+                "Harvest", 0, 0, ct);
+
+            Assert.Equal(ActionOutcome.Success, result.Outcome);
+        }
+
+        await factory.InsertPlantsAsync([(0, 0)]);
+
+        var finalResult = await client.InvokeAsync<HarvestResultDto>(
+            "Harvest", 0, 0, ct);
+
+        Assert.Equal(ActionOutcome.NotEnoughEnergy, finalResult.Outcome);
+    }
 }
