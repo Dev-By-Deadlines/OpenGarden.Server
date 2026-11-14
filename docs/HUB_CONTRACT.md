@@ -29,6 +29,13 @@ A connection without a valid login is rejected with 401.
 
 The access token is short-lived. When a request returns 401, call `/api/refresh-token`, then retry. A dropped hub connection should do the same before reconnecting.
 
+## Energy and seeds
+
+- Planting and harvesting both cost energy (`plantCost`, `harvestCost` from `GetGameConfig`). Energy regenerates over time, and guests have less than registered players.
+- Planting also uses one seed of the chosen plant type. Harvesting gives the player seeds of the harvested plant's type.
+- A new player starts with some seeds of every plant type.
+- A refused action costs nothing.
+
 ## Plant types
 
 The server sends only `plantTypeId`. The client picks the colors.
@@ -71,27 +78,29 @@ A plant is ripe when `ripeAt` (UTC) has passed.
 
 ### `Plant(plantTypeId, cellX, cellY)`
 
+Plants a sprout on an empty cell. Costs `plantCost` energy and one seed of `plantTypeId`.
+
 ```json
 { "outcome": "Success" }
 ```
 
-Outcomes: `Success`, `CellOccupied`, `OutOfBounds`, `UnknownPlantType`.
+Outcomes: `Success`, `CellOccupied`, `OutOfBounds`, `UnknownPlantType`, `NotEnoughEnergy`, `NoSeeds`.
 
 ### `Harvest(cellX, cellY)`
 
-Removes the plant on a cell.
+Removes the plant on a cell. Costs `harvestCost` energy and gives seeds of the plant's type.
 
 ```json
 { "outcome": "Success" }
 ```
 
-Outcomes: `Success`, `CellEmpty`, `OutOfBounds`.
+Outcomes: `Success`, `CellEmpty`, `OutOfBounds`, `NotEnoughEnergy`.
 
 ## Events
 
 ### `WorldUpdated`
 
-Sent to every connected client when a plant is planted or harvested. Register the handler before starting the connection.
+Sent to every connected client when a plant is planted, harvested or spawned by the server. Register the handler before starting the connection.
 
 The payload is an array of cells. `plant` has the same shape as the plants in `LoadNearbyObjects`, and is `null` when the cell is now empty.
 
