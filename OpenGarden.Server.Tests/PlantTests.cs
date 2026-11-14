@@ -50,4 +50,27 @@ public class PlantTests(OpenGardenWebApplicationFactory factory)
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         Assert.Equal(cells, await db.Plants.CountAsync(ct));
     }
+
+    [Fact]
+    public async Task Plant_WithNoSeeds_ReturnsNoSeeds()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        await factory.ResetPlantsAsync();
+
+        await using var player = factory.CreateHubConnection();
+        await player.StartAsync(ct);
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            await db.SeedInventories
+                .Where(s => s.PlantTypeId == 3)
+                .ExecuteUpdateAsync(s =>
+                        s.SetProperty(x => x.Quantity, 0), ct);
+        }
+
+        var result = await player.InvokeAsync<PlantResultDto>("Plant", (short)3, 0, 0, ct);
+
+        Assert.Equal(ActionOutcome.NoSeeds, result.Outcome);
+    }
 }

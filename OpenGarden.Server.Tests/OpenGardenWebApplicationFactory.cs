@@ -101,4 +101,30 @@ public class OpenGardenWebApplicationFactory : WebApplicationFactory<Program>, I
 
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
     }
+
+    public async Task<int> GetSeedsAsync(string playerId, short plantTypeId)
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return await db.SeedInventories
+            .Where(s => s.PlayerId == playerId && s.PlantTypeId == plantTypeId)
+            .Select(s => s.Quantity)
+            .SingleAsync();
+    }
+
+    public async Task SetSeedsAsync(string playerId, short plantTypeId, int quantity)
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await db.SeedInventories
+            .Where(s => s.PlayerId == playerId && s.PlantTypeId == plantTypeId)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.Quantity, quantity));
+    }
+
+    public async Task<int> CountPlantsAsync()
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return await db.Plants.CountAsync();
+    }
 }
