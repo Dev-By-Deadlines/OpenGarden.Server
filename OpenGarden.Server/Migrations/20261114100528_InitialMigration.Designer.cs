@@ -13,7 +13,7 @@ using OpenGarden.Server.Data;
 namespace OpenGarden.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261110090138_InitialMigration")]
+    [Migration("20261114100528_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -387,6 +387,27 @@ namespace OpenGarden.Server.Migrations
                     b.ToTable("RefreshTokens", "identity");
                 });
 
+            modelBuilder.Entity("OpenGarden.Server.Models.SeedInventory", b =>
+                {
+                    b.Property<string>("PlayerId")
+                        .HasColumnType("text");
+
+                    b.Property<short>("PlantTypeId")
+                        .HasColumnType("smallint");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PlayerId", "PlantTypeId");
+
+                    b.HasIndex("PlantTypeId");
+
+                    b.ToTable("SeedInventory", "public", t =>
+                        {
+                            t.HasCheckConstraint("CK_SeedInventory_Quantity", "\"Quantity\" >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -469,6 +490,21 @@ namespace OpenGarden.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("OpenGarden.Server.Models.SeedInventory", b =>
+                {
+                    b.HasOne("OpenGarden.Server.Models.PlantType", null)
+                        .WithMany()
+                        .HasForeignKey("PlantTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OpenGarden.Server.Models.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

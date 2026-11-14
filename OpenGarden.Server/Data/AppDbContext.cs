@@ -22,4 +22,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Plant> Plants => Set<Plant>();
     public DbSet<PlantType> PlantTypes => Set<PlantType>();
+    public DbSet<SeedInventory> SeedInventories => Set<SeedInventory>();
 }

@@ -258,6 +258,35 @@ namespace OpenGarden.Server.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "SeedInventory",
+                schema: "public",
+                columns: table => new
+                {
+                    PlayerId = table.Column<string>(type: "text", nullable: false),
+                    PlantTypeId = table.Column<short>(type: "smallint", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SeedInventory", x => new { x.PlayerId, x.PlantTypeId });
+                    table.CheckConstraint("CK_SeedInventory_Quantity", "\"Quantity\" >= 0");
+                    table.ForeignKey(
+                        name: "FK_SeedInventory_PlantTypes_PlantTypeId",
+                        column: x => x.PlantTypeId,
+                        principalSchema: "public",
+                        principalTable: "PlantTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SeedInventory_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalSchema: "public",
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 schema: "public",
                 table: "PlantTypes",
@@ -344,6 +373,12 @@ namespace OpenGarden.Server.Migrations
                 schema: "identity",
                 table: "RefreshTokens",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SeedInventory_PlantTypeId",
+                schema: "public",
+                table: "SeedInventory",
+                column: "PlantTypeId");
         }
 
         /// <inheritdoc />
@@ -374,12 +409,12 @@ namespace OpenGarden.Server.Migrations
                 schema: "public");
 
             migrationBuilder.DropTable(
-                name: "Players",
-                schema: "public");
-
-            migrationBuilder.DropTable(
                 name: "RefreshTokens",
                 schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "SeedInventory",
+                schema: "public");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles",
@@ -387,6 +422,10 @@ namespace OpenGarden.Server.Migrations
 
             migrationBuilder.DropTable(
                 name: "PlantTypes",
+                schema: "public");
+
+            migrationBuilder.DropTable(
+                name: "Players",
                 schema: "public");
 
             migrationBuilder.DropTable(

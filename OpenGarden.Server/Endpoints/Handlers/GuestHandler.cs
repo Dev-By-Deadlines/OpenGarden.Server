@@ -1,4 +1,4 @@
-
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using NodaTime;
 using OpenGarden.Server.Constants;
@@ -65,6 +65,18 @@ public class GuestHandler
         };
 
         dbContext.RefreshTokens.Add(refreshToken);
+
+        var plantTypeIds = await dbContext.PlantTypes.Select(t => t.Id).ToListAsync();
+
+        foreach (var typeId in plantTypeIds)
+        {
+            dbContext.SeedInventories.Add(new SeedInventory
+            {
+                PlayerId = userId,
+                PlantTypeId = typeId,
+                Quantity = GameConstants.StarterSeedsPerType
+            });
+        }
 
         await dbContext.SaveChangesAsync();
 

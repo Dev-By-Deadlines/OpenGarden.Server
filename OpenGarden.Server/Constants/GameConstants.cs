@@ -15,6 +15,7 @@ public static class GameConstants
     public const int GuestMaxEnergy = 50;
     public const int EnergyRegenSeconds = 6;
     public const int GuestEnergyRegenSeconds = 6;
+    public const int StarterSeedsPerType = 5;
 
     public const int SpawnIntervalSeconds = 60;
 }
