@@ -37,8 +37,8 @@ public class PlantTests(OpenGardenWebApplicationFactory factory)
         for (int x = 0; x < cells; x++)
         {
             // start both calls before awaiting either one
-            var first = a.InvokeAsync<PlantResultDto>("Plant", (short)1, x, 0, ct);
-            var second = b.InvokeAsync<PlantResultDto>("Plant", (short)2, x, 0, ct);
+            var first = a.InvokeAsync<PlantResultDto>("Plant", (short)(x + 1), x, 0, ct);
+            var second = b.InvokeAsync<PlantResultDto>("Plant", (short)(x + 1), x, 0, ct);
 
             var results = await Task.WhenAll(first, second);
 
