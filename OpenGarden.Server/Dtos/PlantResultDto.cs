@@ -10,5 +10,6 @@ public enum ActionOutcome
     OutOfBounds,
     UnknownPlantType,
     CellEmpty,
-    UnknownPlayer
+    UnknownPlayer,
+    NoSeeds
 }

@@ -23,8 +23,22 @@ public class PlantingService(AppDbContext db, IClock clock, ClientUpdater client
                 .FirstOrDefaultAsync(p => p.Id == playerId, ct);
             if (player is null) return ActionOutcome.UnknownPlayer;
 
+            // change the in-memory player only, nothing is saved yet
             if (!energyService.TrySpend(player, GameConstants.PlantCost))
                 return ActionOutcome.NotEnoughEnergy;
+        }
+
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+
+        if (playerId is not null)
+        {
+            // classic stock = 1 race condition
+            var spent = await db.SeedInventories
+                .Where(s => s.PlayerId == playerId && s.PlantTypeId == plantTypeId && s.Quantity >= 1)
+                .ExecuteUpdateAsync(s =>
+                        s.SetProperty(x => x.Quantity, x => x.Quantity - 1), ct);
+
+            if (spent == 0) return ActionOutcome.NoSeeds;
         }
 
         var ripeAt = clock.GetCurrentInstant() + Duration.FromSeconds(GameConstants.GrowthTimeSeconds);
@@ -35,6 +49,8 @@ public class PlantingService(AppDbContext db, IClock clock, ClientUpdater client
         {
             return ActionOutcome.CellOccupied;
         }
+
+        await transaction.CommitAsync(ct);
 
         var plant = new PlantDto(cellX, cellY, plantTypeId, ripeAt.ToDateTimeUtc());
         await clientUpdater.UpdateAllClients([new CellUpdateDto(cellX, cellY, plant)]);
