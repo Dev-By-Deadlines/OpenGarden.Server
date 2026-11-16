@@ -35,6 +35,7 @@ The access token is short-lived. When a request returns 401, call `/api/refresh-
 - Planting also uses one seed of the chosen plant type. Harvesting gives the player seeds of the harvested plant's type.
 - A new player starts with some seeds of every plant type.
 - A refused action costs nothing.
+- To display energy, take `energy` from the response, remember when it arrived, and add one point per `energyRegenSeconds` elapsed, up to `maxEnergy`.
 
 ## Plant types
 
@@ -51,6 +52,46 @@ The server sends only `plantTypeId`. The client picks the colors.
 | 7 | Light Blue | 15 | Dark Gray |
 | 8 | Blue | 16 | Black |
 
+## Player state
+
+### `PlayerState`
+
+The player's current energy and seed inventory.
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `energy` | `int` | Current energy |
+| `maxEnergy` | `int` | Maximum energy |
+| `energyRegenSeconds` | `int` | Seconds required to regenerate one energy point |
+| `seeds` | `SeedStack[]` | Seed inventory, grouped by plant type |
+
+Each seed stack has this shape:
+
+```json
+{
+  "plantTypeId": 3,
+  "quantity": 10
+}
+```
+
+### `GetPlayerState()`
+
+Returns the current player's state.
+
+```json
+{
+  "energy": 50,
+  "maxEnergy": 100,
+  "energyRegenSeconds": 60,
+  "seeds": [
+    { "plantTypeId": 1, "quantity": 10 },
+    { "plantTypeId": 3, "quantity": 15 }
+  ]
+}
+```
+
+The return type is nullable (`PlayerStateDto?`).
+
 ## Methods
 
 ### `GetGameConfig()`
@@ -66,12 +107,27 @@ Call it right after connecting, and again after every reconnect.
 | `growthTimeSeconds` | Time for a plant to become ripe |
 | `serverTimeUnixMilliseconds` | Server time, to correct the client clock: `offset = serverTime - Date.now()` |
 
+### `GetPlayerState()`
+
+Returns the current player's `PlayerState` (see above).
+
+Call it when connecting or reconnecting to obtain the latest player state.
+
 ### `LoadNearbyObjects(chunkX, chunkY)`
 
 Returns the plants in that chunk and the chunks around it. Clipped at the map edges. Empty cells have no entry.
 
 ```json
-{ "plants": [ { "x": 100, "y": 200, "plantTypeId": 3, "ripeAt": "2026-11-02T12:00:00Z" } ] }
+{
+  "plants": [
+    {
+      "x": 100,
+      "y": 200,
+      "plantTypeId": 3,
+      "ripeAt": "2026-11-02T12:00:00Z"
+    }
+  ]
+}
 ```
 
 A plant is ripe when `ripeAt` (UTC) has passed.
@@ -81,20 +137,53 @@ A plant is ripe when `ripeAt` (UTC) has passed.
 Plants a sprout on an empty cell. Costs `plantCost` energy and one seed of `plantTypeId`.
 
 ```json
-{ "outcome": "Success" }
+{
+  "outcome": "Success",
+  "playerState": {
+    "energy": 40,
+    "maxEnergy": 100,
+    "energyRegenSeconds": 60,
+    "seeds": [
+      { "plantTypeId": 3, "quantity": 9 }
+    ]
+  }
+}
 ```
 
 Outcomes: `Success`, `CellOccupied`, `OutOfBounds`, `UnknownPlantType`, `NotEnoughEnergy`, `NoSeeds`.
 
+The response includes the player's updated state.
+
 ### `Harvest(cellX, cellY)`
 
-Removes the plant on a cell. Costs `harvestCost` energy and gives seeds of the plant's type.
+Removes the plant on a cell. Costs `harvestCost` energy and gives seeds of the harvested plant's type.
 
 ```json
-{ "outcome": "Success" }
+{
+  "outcome": "Success",
+  "plantTypeId": 3,
+  "seedsGained": 5,
+  "playerState": {
+    "energy": 30,
+    "maxEnergy": 100,
+    "energyRegenSeconds": 60,
+    "seeds": [
+      { "plantTypeId": 3, "quantity": 14 }
+    ]
+  }
+}
 ```
 
+| Field | Meaning |
+| --- | --- |
+| `outcome` | Result of the harvest action |
+| `plantTypeId` | Type of the harvested plant; nullable |
+| `seedsGained` | Number of seeds gained |
+| `playerState` | Updated player state |
+
 Outcomes: `Success`, `CellEmpty`, `OutOfBounds`, `NotEnoughEnergy`.
+
+The response includes the harvested plant's type, the number of seeds gained, and the player's updated state.
 
 ## Events
 
@@ -106,8 +195,21 @@ The payload is an array of cells. `plant` has the same shape as the plants in `L
 
 ```json
 [
-  { "x": 100, "y": 200, "plant": { "x": 100, "y": 200, "plantTypeId": 3, "ripeAt": "2026-11-02T12:00:00Z" } },
-  { "x": 101, "y": 200, "plant": null }
+  {
+    "x": 100,
+    "y": 200,
+    "plant": {
+      "x": 100,
+      "y": 200,
+      "plantTypeId": 3,
+      "ripeAt": "2026-11-02T12:00:00Z"
+    }
+  },
+  {
+    "x": 101,
+    "y": 200,
+    "plant": null
+  }
 ]
 ```
 
