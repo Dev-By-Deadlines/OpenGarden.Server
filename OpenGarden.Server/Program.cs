@@ -121,6 +121,7 @@ try
     builder.Services.AddScoped<PlantingService>();
     builder.Services.AddScoped<EnergyService>();
     builder.Services.AddScoped<HarvestService>();
+    builder.Services.AddScoped<PlayerStateService>();
 
     var app = builder.Build();
 

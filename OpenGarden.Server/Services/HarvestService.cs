@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using OpenGarden.Server.Constants;
@@ -8,9 +9,17 @@ using OpenGarden.Server.Utils;
 
 namespace OpenGarden.Server.Services;
 
-public class HarvestService(AppDbContext db, IClock clock, ClientUpdater clientUpdater, EnergyService energyService)
+public class HarvestService(
+    AppDbContext db,
+    IClock clock,
+    ClientUpdater clientUpdater,
+    EnergyService energyService)
 {
-    public async Task<HarvestResult> TryHarvestAsync(int cellX, int cellY, string playerId, CancellationToken ct = default)
+    public async Task<HarvestResult> TryHarvestAsync(
+        int cellX,
+        int cellY,
+        string playerId,
+        CancellationToken ct = default)
     {
         if (!GridMath.IsInWorldBounds(cellX, cellY))
             return new HarvestResult(ActionOutcome.OutOfBounds);
@@ -18,10 +27,11 @@ public class HarvestService(AppDbContext db, IClock clock, ClientUpdater clientU
         var player = await db.Players
             .Include(p => p.User)
             .FirstOrDefaultAsync(p => p.Id == playerId, ct);
+
         if (player is null)
             return new HarvestResult(ActionOutcome.UnknownPlayer);
 
-        if (!energyService.TrySpend(player, GameConstants.HarvestCost))   // in memory only
+        if (!energyService.TrySpend(player, GameConstants.HarvestCost))
             return new HarvestResult(ActionOutcome.NotEnoughEnergy);
 
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
@@ -29,27 +39,31 @@ public class HarvestService(AppDbContext db, IClock clock, ClientUpdater clientU
         var plant = await db.Plants
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.X == cellX && p.Y == cellY, ct);
+
         if (plant is null)
             return new HarvestResult(ActionOutcome.CellEmpty);
 
-        // delete exactly the plant we read: if it changed in between, nothing is deleted
+        // Delete exactly the plant we read.
         var deleted = await db.Plants
             .Where(p => p.X == cellX && p.Y == cellY && p.PlantTypeId == plant.PlantTypeId)
             .ExecuteDeleteAsync(ct);
+
         if (deleted == 0)
             return new HarvestResult(ActionOutcome.CellEmpty);
 
         var seeds = GetHarvestedSeedCount(plant);
 
-        // "quantity = quantity + x" in SQL, not "quantity = y", so two harvests can't overwrite each other
         await db.SeedInventories
             .Where(s => s.PlayerId == playerId && s.PlantTypeId == plant.PlantTypeId)
-            .ExecuteUpdateAsync(s => s.SetProperty(x => x.Quantity, x => x.Quantity + seeds), ct);
+            .ExecuteUpdateAsync(
+                s => s.SetProperty(x => x.Quantity, x => x.Quantity + seeds), ct);
 
-        await db.SaveChangesAsync(ct);   // saves the energy change
+        await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
 
-        await clientUpdater.UpdateAllClients([new CellUpdateDto(cellX, cellY, null)]);
+        await clientUpdater.UpdateAllClients(
+            [new CellUpdateDto(cellX, cellY, null)]);
+
         return new HarvestResult(ActionOutcome.Success, plant.PlantTypeId, seeds);
     }
 
@@ -58,6 +72,9 @@ public class HarvestService(AppDbContext db, IClock clock, ClientUpdater clientU
         var isRipe = plant.RipeAt <= clock.GetCurrentInstant();
 
         return isRipe
-            ? Random.Shared.Next(GameConstants.RipeSeedsMin, GameConstants.RipeSeedsMax + 1) : 1;
+            ? Random.Shared.Next(
+                GameConstants.RipeSeedsMin,
+                GameConstants.RipeSeedsMax + 1)
+            : 1;
     }
 }
