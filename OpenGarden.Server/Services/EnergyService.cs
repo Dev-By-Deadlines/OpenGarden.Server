@@ -8,24 +8,23 @@ public class EnergyService(IClock clock)
 {
     public bool TrySpend(Player player, int cost)
     {
-        var now = clock.GetCurrentInstant();
-        var current = GetCurrent(player);
+        var status = GetCurrent(player);
+        if (status.Current < cost) return false;
 
-        if (current < cost) return false;
-
-        player.Energy = current - cost;
-        player.EnergyUpdatedAt = now;
+        player.Energy = status.Current - cost;
+        player.EnergyUpdatedAt = clock.GetCurrentInstant();
         return true;
     }
 
-    public int GetCurrent(Player player)
+    public record EnergyStatus(int Current, int Max, int RegenSeconds);
+    public EnergyStatus GetCurrent(Player player)
     {
         var max = player.User.IsGuest ? GameConstants.GuestMaxEnergy : GameConstants.MaxEnergy;
         var regenSeconds = player.User.IsGuest ? GameConstants.GuestEnergyRegenSeconds : GameConstants.EnergyRegenSeconds;
 
-        var now = clock.GetCurrentInstant();
-        var secondsPassed = (now - player.EnergyUpdatedAt).TotalSeconds;
+        var secondsPassed = (clock.GetCurrentInstant() - player.EnergyUpdatedAt).TotalSeconds;
         var regenerated = (int)(secondsPassed / regenSeconds);
-        return Math.Min(max, player.Energy + regenerated);
+
+        return new EnergyStatus(Math.Min(max, player.Energy + regenerated), max, regenSeconds);
     }
 }
