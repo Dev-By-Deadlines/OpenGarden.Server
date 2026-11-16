@@ -39,6 +39,11 @@ public class GameHub(
             _clock.GetCurrentInstant().ToUnixTimeMilliseconds()));
     }
 
+    public async Task<PlayerStateDto?> GetPlayerState()
+    {
+        return await _playerStateService.GetAsync(GetPlayerId(), Context.ConnectionAborted);
+    }
+
     public async Task<LoadResultDto> LoadNearbyObjects(int chunkX, int chunkY)
     {
         if (!GridMath.IsValidChunk(chunkX, chunkY))
