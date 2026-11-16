@@ -68,8 +68,9 @@ public class GameHub(
 
     public async Task<HarvestResultDto> Harvest(int cellX, int cellY)
     {
-        return new HarvestResultDto(await _harvestService
-            .TryHarvestAsync(cellX, cellY, GetPlayerId(), Context.ConnectionAborted));
+        var result = await _harvestService.TryHarvestAsync(cellX, cellY, GetPlayerId(), Context.ConnectionAborted);
+        var state = await _playerStateService.GetAsync(GetPlayerId(), Context.ConnectionAborted);
+        return new HarvestResultDto(result.Outcome, result.PlantTypeId, result.SeedsGained, state);
     }
 
     private string GetPlayerId() => Context.UserIdentifier!;

@@ -10,19 +10,19 @@ namespace OpenGarden.Server.Services;
 
 public class HarvestService(AppDbContext db, IClock clock, ClientUpdater clientUpdater, EnergyService energyService)
 {
-    public async Task<ActionOutcome> TryHarvestAsync(int cellX, int cellY, string playerId, CancellationToken ct = default)
+    public async Task<HarvestResult> TryHarvestAsync(int cellX, int cellY, string playerId, CancellationToken ct = default)
     {
         if (!GridMath.IsInWorldBounds(cellX, cellY))
-            return ActionOutcome.OutOfBounds;
+            return new HarvestResult(ActionOutcome.OutOfBounds);
 
         var player = await db.Players
             .Include(p => p.User)
             .FirstOrDefaultAsync(p => p.Id == playerId, ct);
         if (player is null)
-            return ActionOutcome.UnknownPlayer;
+            return new HarvestResult(ActionOutcome.UnknownPlayer);
 
         if (!energyService.TrySpend(player, GameConstants.HarvestCost))   // in memory only
-            return ActionOutcome.NotEnoughEnergy;
+            return new HarvestResult(ActionOutcome.NotEnoughEnergy);
 
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
 
@@ -30,28 +30,27 @@ public class HarvestService(AppDbContext db, IClock clock, ClientUpdater clientU
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.X == cellX && p.Y == cellY, ct);
         if (plant is null)
-            return ActionOutcome.CellEmpty;
+            return new HarvestResult(ActionOutcome.CellEmpty);
 
         // delete exactly the plant we read: if it changed in between, nothing is deleted
         var deleted = await db.Plants
             .Where(p => p.X == cellX && p.Y == cellY && p.PlantTypeId == plant.PlantTypeId)
             .ExecuteDeleteAsync(ct);
         if (deleted == 0)
-            return ActionOutcome.CellEmpty;
+            return new HarvestResult(ActionOutcome.CellEmpty);
 
         var seeds = GetHarvestedSeedCount(plant);
 
-        // again, make the SQL like "quantity = quantity + x" instead of "quantity = y" which could lead into race conditions.
+        // "quantity = quantity + x" in SQL, not "quantity = y", so two harvests can't overwrite each other
         await db.SeedInventories
             .Where(s => s.PlayerId == playerId && s.PlantTypeId == plant.PlantTypeId)
-            .ExecuteUpdateAsync(s =>
-                    s.SetProperty(x => x.Quantity, x => x.Quantity + seeds), ct);
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.Quantity, x => x.Quantity + seeds), ct);
 
         await db.SaveChangesAsync(ct);   // saves the energy change
         await transaction.CommitAsync(ct);
 
         await clientUpdater.UpdateAllClients([new CellUpdateDto(cellX, cellY, null)]);
-        return ActionOutcome.Success;
+        return new HarvestResult(ActionOutcome.Success, plant.PlantTypeId, seeds);
     }
 
     private int GetHarvestedSeedCount(Plant plant)
