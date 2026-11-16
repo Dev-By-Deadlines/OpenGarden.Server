@@ -1,6 +1,6 @@
 namespace OpenGarden.Server.Dtos;
 
-public record PlantResultDto(ActionOutcome Outcome) { }
+public record PlantResultDto(ActionOutcome Outcome, PlayerStateDto? PlayerState) { }
 
 public enum ActionOutcome
 {

@@ -15,7 +15,8 @@ public class GameHub(
     AppDbContext _dbContext,
     IClock _clock,
     PlantingService _plantingService,
-    HarvestService _harvestService
+    HarvestService _harvestService,
+    PlayerStateService _playerStateService
 ) : Hub
 {
     public override async Task OnConnectedAsync()
@@ -60,8 +61,9 @@ public class GameHub(
 
     public async Task<PlantResultDto> Plant(short plantTypeId, int cellX, int cellY)
     {
-        return new PlantResultDto(await _plantingService
-                .TryPlantAsync(plantTypeId, cellX, cellY, GetPlayerId(), Context.ConnectionAborted));
+        var outcome = await _plantingService.TryPlantAsync(plantTypeId, cellX, cellY, GetPlayerId(), Context.ConnectionAborted);
+        var state = await _playerStateService.GetAsync(GetPlayerId(), Context.ConnectionAborted);
+        return new PlantResultDto(outcome, state);
     }
 
     public async Task<HarvestResultDto> Harvest(int cellX, int cellY)
