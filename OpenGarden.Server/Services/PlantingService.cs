@@ -48,7 +48,7 @@ public class PlantingService(AppDbContext db, IClock clock, ClientUpdater client
         }
 
         var ripeAt = clock.GetCurrentInstant() + Duration.FromSeconds(GameConstants.GrowthTimeSeconds);
-        db.Plants.Add(new Plant { PlantTypeId = plantTypeId, X = cellX, Y = cellY, RipeAt = ripeAt });
+        db.Plants.Add(new Plant { PlantTypeId = plantTypeId, X = cellX, Y = cellY, RipeAt = ripeAt, PlantedById = plantedById });
 
         try { await db.SaveChangesAsync(ct); }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
@@ -58,7 +58,6 @@ public class PlantingService(AppDbContext db, IClock clock, ClientUpdater client
 
         await transaction.CommitAsync(ct);
 
-        db.Plants.Add(new Plant { PlantTypeId = plantTypeId, X = cellX, Y = cellY, RipeAt = ripeAt, PlantedById = plantedById });
         var plant = new PlantDto(cellX, cellY, plantTypeId, ripeAt.ToDateTimeUtc(), plantedBy);
 
         await clientUpdater.UpdateAllClients([new CellUpdateDto(cellX, cellY, plant)]);

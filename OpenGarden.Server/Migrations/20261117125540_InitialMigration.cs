@@ -244,11 +244,19 @@ namespace OpenGarden.Server.Migrations
                     X = table.Column<int>(type: "integer", nullable: false),
                     Y = table.Column<int>(type: "integer", nullable: false),
                     PlantTypeId = table.Column<short>(type: "smallint", nullable: false),
-                    RipeAt = table.Column<Instant>(type: "timestamp with time zone", nullable: false)
+                    RipeAt = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
+                    PlantedById = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Plants", x => new { x.X, x.Y });
+                    table.ForeignKey(
+                        name: "FK_Plants_AspNetUsers_PlantedById",
+                        column: x => x.PlantedById,
+                        principalSchema: "identity",
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Plants_PlantTypes_PlantTypeId",
                         column: x => x.PlantTypeId,
@@ -354,6 +362,12 @@ namespace OpenGarden.Server.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Plants_PlantedById",
+                schema: "public",
+                table: "Plants",
+                column: "PlantedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Plants_PlantTypeId",

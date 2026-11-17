@@ -13,8 +13,8 @@ using OpenGarden.Server.Data;
 namespace OpenGarden.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261117123635_AddPlantedBy")]
-    partial class AddPlantedBy
+    [Migration("20261117125540_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
