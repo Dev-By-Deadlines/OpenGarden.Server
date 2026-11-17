@@ -124,13 +124,16 @@ Returns the plants in that chunk and the chunks around it. Clipped at the map ed
       "x": 100,
       "y": 200,
       "plantTypeId": 3,
-      "ripeAt": "2026-11-02T12:00:00Z"
+      "ripeAt": "2026-11-02T12:00:00Z",
+      "plantedBy": "Guest_123"
     }
   ]
 }
 ```
 
 A plant is ripe when `ripeAt` (UTC) has passed.
+
+`plantedBy` is the username of the player who planted it. It is nullable and may be `null`.
 
 ### `Plant(plantTypeId, cellX, cellY)`
 
@@ -202,7 +205,8 @@ The payload is an array of cells. `plant` has the same shape as the plants in `L
       "x": 100,
       "y": 200,
       "plantTypeId": 3,
-      "ripeAt": "2026-11-02T12:00:00Z"
+      "ripeAt": "2026-11-02T12:00:00Z",
+      "plantedBy": "Guest_123"
     }
   },
   {
@@ -214,3 +218,5 @@ The payload is an array of cells. `plant` has the same shape as the plants in `L
 ```
 
 Each entry says what the cell is now: set the cell to it. Applying the same update twice is harmless. The player who made the change receives it too.
+
+`plantedBy` is nullable. Clients should handle `null` rather than assuming every plant has an associated player.
