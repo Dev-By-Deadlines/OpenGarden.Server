@@ -10,5 +10,10 @@ public sealed class PlantsConfiguration : IEntityTypeConfiguration<Plant>
     {
         builder.HasKey(p => new { p.X, p.Y });
         builder.ToTable("Plants", "public");
+
+        builder.HasOne(p => p.PlantedBy)
+               .WithMany()
+               .HasForeignKey(p => p.PlantedById)
+               .OnDelete(DeleteBehavior.SetNull);
     }
 }

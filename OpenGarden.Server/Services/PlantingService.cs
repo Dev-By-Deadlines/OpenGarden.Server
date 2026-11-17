@@ -16,12 +16,18 @@ public class PlantingService(AppDbContext db, IClock clock, ClientUpdater client
         if (!GridMath.IsInWorldBounds(cellX, cellY)) return ActionOutcome.OutOfBounds;
         if (!await db.PlantTypes.AnyAsync(t => t.Id == plantTypeId, ct)) return ActionOutcome.UnknownPlantType;
 
+        string? plantedBy = null;
+        string? plantedById = null;
+
         if (playerId is not null)
         {
             var player = await db.Players
                 .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.Id == playerId, ct);
             if (player is null) return ActionOutcome.UnknownPlayer;
+
+            plantedBy = player.User.UserName;
+            plantedById = playerId;
 
             // change the in-memory player only, nothing is saved yet
             if (!energyService.TrySpend(player, GameConstants.PlantCost))
@@ -52,7 +58,9 @@ public class PlantingService(AppDbContext db, IClock clock, ClientUpdater client
 
         await transaction.CommitAsync(ct);
 
-        var plant = new PlantDto(cellX, cellY, plantTypeId, ripeAt.ToDateTimeUtc());
+        db.Plants.Add(new Plant { PlantTypeId = plantTypeId, X = cellX, Y = cellY, RipeAt = ripeAt, PlantedById = plantedById });
+        var plant = new PlantDto(cellX, cellY, plantTypeId, ripeAt.ToDateTimeUtc(), plantedBy);
+
         await clientUpdater.UpdateAllClients([new CellUpdateDto(cellX, cellY, plant)]);
         return ActionOutcome.Success;
     }

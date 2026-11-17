@@ -58,7 +58,7 @@ public class GameHub(
                 p.X <= cellBounds.MaxX &&
                 p.Y >= cellBounds.MinY &&
                 p.Y <= cellBounds.MaxY)
-            .Select(p => new PlantDto(p.X, p.Y, p.PlantTypeId, p.RipeAt.ToDateTimeUtc()))
+            .Select(p => new PlantDto(p.X, p.Y, p.PlantTypeId, p.RipeAt.ToDateTimeUtc(), p.PlantedBy!.UserName))
             .ToListAsync();
 
         return new LoadResultDto(plants);

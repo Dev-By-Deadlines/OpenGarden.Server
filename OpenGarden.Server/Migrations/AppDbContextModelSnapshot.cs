@@ -234,12 +234,17 @@ namespace OpenGarden.Server.Migrations
                     b.Property<short>("PlantTypeId")
                         .HasColumnType("smallint");
 
+                    b.Property<string>("PlantedById")
+                        .HasColumnType("text");
+
                     b.Property<Instant>("RipeAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("X", "Y");
 
                     b.HasIndex("PlantTypeId");
+
+                    b.HasIndex("PlantedById");
 
                     b.ToTable("Plants", "public");
                 });
@@ -464,7 +469,14 @@ namespace OpenGarden.Server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("OpenGarden.Server.Data.ApplicationUser", "PlantedBy")
+                        .WithMany()
+                        .HasForeignKey("PlantedById")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("PlantType");
+
+                    b.Navigation("PlantedBy");
                 });
 
             modelBuilder.Entity("OpenGarden.Server.Models.Player", b =>
