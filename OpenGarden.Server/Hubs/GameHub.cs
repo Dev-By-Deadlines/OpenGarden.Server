@@ -49,7 +49,10 @@ public class GameHub(
         if (!GridMath.IsValidChunk(chunkX, chunkY))
             throw new HubException("Chunk is outside the map.");
 
-        var cellBounds = GridMath.GetCellBoundsAroundChunk(new ChunkCoord(chunkX, chunkY));
+        var focus = new ChunkCoord(chunkX, chunkY);
+        await SubscribeToChunksAsync(focus);
+
+        var cellBounds = GridMath.GetCellBoundsAroundChunk(focus);
 
         var plants = await _dbContext.Plants
             .AsNoTracking()
@@ -84,6 +87,22 @@ public class GameHub(
             result.PlantTypeId,
             result.SeedsGained,
             state);
+    }
+
+    private async Task SubscribeToChunksAsync(ChunkCoord focus)
+    {
+        var wanted = GridMath.GetChunksAround(focus).ToHashSet();
+        var current = Context.Items.TryGetValue("chunks", out var stored)
+            ? (HashSet<ChunkCoord>)stored!
+            : new HashSet<ChunkCoord>();
+
+        foreach (var chunk in current.Except(wanted))
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, GridMath.GetGroupName(chunk));
+
+        foreach (var chunk in wanted.Except(current))
+            await Groups.AddToGroupAsync(Context.ConnectionId, GridMath.GetGroupName(chunk));
+
+        Context.Items["chunks"] = wanted;
     }
 
     private string GetPlayerId() => Context.UserIdentifier!;

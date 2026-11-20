@@ -60,7 +60,7 @@ public class PlantingService(AppDbContext db, IClock clock, ClientUpdater client
 
         var plant = new PlantDto(cellX, cellY, plantTypeId, ripeAt.ToDateTimeUtc(), plantedBy);
 
-        await clientUpdater.UpdateAllClients([new CellUpdateDto(cellX, cellY, plant)]);
+        await clientUpdater.NotifyCellsChanged([new CellUpdateDto(cellX, cellY, plant)]);
         return ActionOutcome.Success;
     }
 }

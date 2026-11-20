@@ -61,7 +61,7 @@ public class HarvestService(
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
 
-        await clientUpdater.UpdateAllClients(
+        await clientUpdater.NotifyCellsChanged(
             [new CellUpdateDto(cellX, cellY, null)]);
 
         return new HarvestResult(ActionOutcome.Success, plant.PlantTypeId, seeds);
