@@ -137,16 +137,13 @@ try
     app.UseSerilogRequestLogging();
     app.UseCors();
     app.UseRateLimiter();
-    if (app.Environment.IsDevelopment())
-    {
-        app.MapOpenApi();
-        app.MapScalarApiReference("/docs", options =>
-                options
-                .WithTitle("OpenGarden API")
-                .WithTheme(ScalarTheme.Saturn)
-                .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.Fetch)
-                );
-    }
+    app.MapOpenApi();
+    app.MapScalarApiReference("/docs", options =>
+            options
+            .WithTitle("OpenGarden API")
+            .WithTheme(ScalarTheme.Saturn)
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.Fetch)
+            );
 
     using (var scope = app.Services.CreateScope())
     {
