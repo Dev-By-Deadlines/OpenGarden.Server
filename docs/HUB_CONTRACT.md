@@ -115,7 +115,16 @@ Call it when connecting or reconnecting to obtain the latest player state.
 
 ### `LoadNearbyObjects(chunkX, chunkY)`
 
-Returns the plants in that chunk and the chunks around it. Clipped at the map edges. Empty cells have no entry.
+Loads the plants in the specified chunk and the chunks around it. The requested area is clipped at the map edges. Empty cells have no entry.
+
+Calling this method also updates the connection's chunk subscriptions.
+
+- The connection subscribes to the requested chunk and its surrounding chunks.
+- Chunks outside the new subscription area are unsubscribed.
+- The new subscriptions are established before the plant query is executed.
+- Subscriptions belong to the current hub connection and are lost when that connection disconnects. Call `LoadNearbyObjects()` again after reconnecting.
+
+The returned plants have this shape:
 
 ```json
 {
@@ -192,9 +201,11 @@ The response includes the harvested plant's type, the number of seeds gained, an
 
 ### `WorldUpdated`
 
-Sent to every connected client when a plant is planted, harvested or spawned by the server. Register the handler before starting the connection.
+Sent to clients subscribed to the chunks containing the changed cells.
 
-The payload is an array of cells. `plant` has the same shape as the plants in `LoadNearbyObjects`, and is `null` when the cell is now empty.
+The server groups changed cells by chunk and sends each group to the corresponding chunk subscribers. A client only receives updates for chunks in its current subscription area.
+
+The payload is an array of cells. Each entry describes the current state of a cell. `plant` has the same shape as the plants in `LoadNearbyObjects`, and is `null` when the cell is now empty.
 
 ```json
 [
@@ -217,6 +228,10 @@ The payload is an array of cells. `plant` has the same shape as the plants in `L
 ]
 ```
 
-Each entry says what the cell is now: set the cell to it. Applying the same update twice is harmless. The player who made the change receives it too.
+Each event payload contains changes belonging to the same chunk.
+
+Each entry says what the cell is now: set the cell to it. Applying the same update twice is harmless.
+
+The client should only apply updates to cells belonging to its currently loaded area. When the loaded area changes, call `LoadNearbyObjects()` for the new focus chunk and use its returned plants to populate that area.
 
 `plantedBy` is nullable. Clients should handle `null` rather than assuming every plant has an associated player.
