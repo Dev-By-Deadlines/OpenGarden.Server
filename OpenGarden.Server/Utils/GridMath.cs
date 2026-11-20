@@ -48,4 +48,19 @@ public static class GridMath
             Random.Shared.Next(chunk.X * size, (chunk.X + 1) * size),
             Random.Shared.Next(chunk.Y * size, (chunk.Y + 1) * size));
     }
+
+    public static List<ChunkCoord> GetChunksAround(ChunkCoord focus)
+    {
+        var r = GameConstants.RenderDistance;
+        var last = GameConstants.ChunksPerSide - 1;
+        var chunks = new List<ChunkCoord>();
+
+        for (int cx = Math.Max(0, focus.X - r); cx <= Math.Min(last, focus.X + r); cx++)
+            for (int cy = Math.Max(0, focus.Y - r); cy <= Math.Min(last, focus.Y + r); cy++)
+                chunks.Add(new ChunkCoord(cx, cy));
+
+        return chunks;
+    }
+
+    public static string GetGroupName(ChunkCoord chunk) => $"chunk:{chunk.X}:{chunk.Y}";
 }
