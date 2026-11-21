@@ -30,15 +30,32 @@ public class ExpiredTokenCleanupJob(
 
     private async Task DeleteExpiredTokensAsync(CancellationToken ct)
     {
-        using var scope = scopeFactory.CreateScope();
+        await using var scope = scopeFactory.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+        await using var transaction =
+            await dbContext.Database.BeginTransactionAsync(ct);
+
         var now = clock.GetCurrentInstant();
-        var deleted = await dbContext.RefreshTokens
-            .Where(rt => rt.Expires < now)
+
+        var deletedTokens = await dbContext.RefreshTokens
+            .Where(rt => rt.Expires <= now)
             .ExecuteDeleteAsync(ct);
 
-        if (deleted > 0)
-            logger.LogInformation("Deleted {Count} expired refresh tokens", deleted);
+        // Delete guest users without any remaining refresh tokens.
+        var deletedUsers = await dbContext.Users
+            .Where(u => u.IsGuest &&
+                        !dbContext.RefreshTokens.Any(rt => rt.UserId == u.Id))
+            .ExecuteDeleteAsync(ct);
+
+        await transaction.CommitAsync(ct);
+
+        if (deletedTokens > 0 || deletedUsers > 0)
+        {
+            logger.LogInformation(
+                "Expired token cleanup: {Tokens} tokens and {Users} guest accounts deleted",
+                deletedTokens,
+                deletedUsers);
+        }
     }
 }
