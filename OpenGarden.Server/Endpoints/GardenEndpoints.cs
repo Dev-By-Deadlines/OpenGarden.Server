@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using OpenGarden.Server.Constants;
 using OpenGarden.Server.Endpoints.Handlers;
 
 namespace OpenGarden.Server.Endpoints;

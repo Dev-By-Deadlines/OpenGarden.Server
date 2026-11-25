@@ -13,14 +13,13 @@ public class RefreshTokenHandler
     public static async Task<IResult> Handler(
         AppDbContext dbContext,
         TokenProvider tokenProvider,
+        IClock clock,
         HttpContext httpContext)
     {
-        var token = httpContext.Request.Cookies["refreshToken"];
+        var token = httpContext.GetRefreshToken();
 
         if (string.IsNullOrEmpty(token))
-        {
             return Results.Unauthorized();
-        }
 
         var tokenHash = RefreshTokenHasher.Hash(token);
 
@@ -29,24 +28,19 @@ public class RefreshTokenHandler
             .FirstOrDefaultAsync(rt => rt.Token == tokenHash);
 
         if (storedRefreshToken is null ||
-            storedRefreshToken.Expires < SystemClock.Instance.GetCurrentInstant())
+            storedRefreshToken.Expires < clock.GetCurrentInstant())
         {
             return Results.Unauthorized();
         }
 
-        var accessToken = await tokenProvider.CreateAccessToken(
+        var access = await tokenProvider.CreateAccessToken(
             storedRefreshToken.ApplicationUser);
 
-        var newToken = tokenProvider.GenerateRefreshToken();
-
-        storedRefreshToken.Token = RefreshTokenHasher.Hash(newToken);
-        storedRefreshToken.Expires = SystemClock.Instance.GetCurrentInstant()
-            + Duration.FromDays(7);
-
-        httpContext.AppendAccessTokenCookie(accessToken);
-        httpContext.AppendRefreshTokenCookie(newToken);
+        var refresh = tokenProvider.RotateRefreshToken(storedRefreshToken);
 
         await dbContext.SaveChangesAsync();
+
+        httpContext.AppendAuthCookies(access, refresh);
 
         return Results.Ok();
     }

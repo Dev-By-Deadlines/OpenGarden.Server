@@ -38,6 +38,15 @@ public static class HttpContextExtensions
             CookieOptions(expiresAt));
     }
 
+    public static void AppendAuthCookies(
+        this HttpContext httpContext,
+        (string Token, Instant ExpiresAt) access,
+        (string Token, Instant ExpiresAt) refresh)
+    {
+        httpContext.AppendAccessTokenCookie(access.Token, access.ExpiresAt);
+        httpContext.AppendRefreshTokenCookie(refresh.Token, refresh.ExpiresAt);
+    }
+
     public static void DeleteAuthCookies(this HttpContext httpContext)
     {
         var options = new CookieOptions

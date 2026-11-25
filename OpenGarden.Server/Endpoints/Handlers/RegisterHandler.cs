@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using OpenGarden.Server.Constants;
 using OpenGarden.Server.Data;
 using OpenGarden.Server.Dtos;
@@ -69,11 +70,18 @@ public class RegisterHandler
 
         await dbContext.SaveChangesAsync();
 
-        var accessToken = await tokenProvider.CreateAccessToken(user);
+        // Remove the old guest refresh tokens
+        await dbContext.RefreshTokens
+            .Where(rt => rt.UserId == user.Id)
+            .ExecuteDeleteAsync();
 
+        var access = await tokenProvider.CreateAccessToken(user);
+        var refresh = tokenProvider.CreateRefreshToken(user.Id);
+
+        await dbContext.SaveChangesAsync();
         await transaction.CommitAsync();
 
-        httpContext.AppendAccessTokenCookie(accessToken);
+        httpContext.AppendAuthCookies(access, refresh);
 
         return Results.Ok();
     }

@@ -1,6 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using NodaTime;
+using Microsoft.EntityFrameworkCore;
 using OpenGarden.Server.Constants;
 using OpenGarden.Server.Data;
 using OpenGarden.Server.Extensions;
@@ -50,23 +49,15 @@ public class GuestHandler
         var addToRoleResult = await userManager.AddToRoleAsync(user, Roles.Guest);
 
         if (!addToRoleResult.Succeeded)
-        {
             return Results.BadRequest(addToRoleResult.Errors);
-        }
 
         dbContext.Players.Add(player);
 
-        var refreshToken = new RefreshToken
-        {
-            Id = Guid.NewGuid(),
-            UserId = user.Id,
-            Token = tokenProvider.GenerateRefreshToken(),
-            Expires = SystemClock.Instance.GetCurrentInstant() + Duration.FromDays(7)
-        };
+        var refresh = tokenProvider.CreateRefreshToken(user.Id);
 
-        dbContext.RefreshTokens.Add(refreshToken);
-
-        var plantTypeIds = await dbContext.PlantTypes.Select(t => t.Id).ToListAsync();
+        var plantTypeIds = await dbContext.PlantTypes
+            .Select(t => t.Id)
+            .ToListAsync();
 
         foreach (var typeId in plantTypeIds)
         {
@@ -80,12 +71,11 @@ public class GuestHandler
 
         await dbContext.SaveChangesAsync();
 
-        string accessToken = await tokenProvider.CreateAccessToken(user);
+        var access = await tokenProvider.CreateAccessToken(user);
 
         await transaction.CommitAsync();
 
-        httpContext.AppendAccessTokenCookie(accessToken);
-        httpContext.AppendRefreshTokenCookie(refreshToken.Token);
+        httpContext.AppendAuthCookies(access, refresh);
 
         return Results.Ok();
     }
