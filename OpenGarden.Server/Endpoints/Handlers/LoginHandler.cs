@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.AspNetCore.Identity;
 using NodaTime;
 using OpenGarden.Server.Data;
@@ -18,46 +16,51 @@ public class LoginHandler
         UserManager<ApplicationUser> userManager,
         AppDbContext dbContext,
         TokenProvider tokenProvider,
+        IClock clock,
         HttpContext httpContext)
     {
         var user = await userManager.FindByNameAsync(loginDto.UserName);
 
         if (user is null || user.IsGuest)
-        {
             return Results.Unauthorized();
-        }
 
         if (await userManager.IsLockedOutAsync(user))
-        {
             return Results.Unauthorized();
-        }
 
         if (!await userManager.CheckPasswordAsync(user, loginDto.Password))
         {
             await userManager.AccessFailedAsync(user);
-
             return Results.Unauthorized();
         }
 
         await userManager.ResetAccessFailedCountAsync(user);
 
-        string accessToken = await tokenProvider.CreateAccessToken(user);
+        var (accessToken, accessTokenExpiresAt) =
+            await tokenProvider.CreateAccessToken(user);
 
-        var token = tokenProvider.GenerateRefreshToken();
+        var refreshToken = tokenProvider.GenerateRefreshToken();
 
-        var refreshToken = new RefreshToken
+        var refreshTokenExpiresAt = clock.GetCurrentInstant()
+            .Plus(Duration.FromDays(7));
+
+        var refreshTokenEntity = new RefreshToken
         {
             Id = Guid.NewGuid(),
             UserId = user.Id,
-            Token = RefreshTokenHasher.Hash(token),
-            Expires = SystemClock.Instance.GetCurrentInstant() + Duration.FromDays(7)
+            Token = RefreshTokenHasher.Hash(refreshToken),
+            Expires = refreshTokenExpiresAt
         };
 
-        httpContext.AppendAccessTokenCookie(accessToken);
-        httpContext.AppendRefreshTokenCookie(token);
-
-        dbContext.RefreshTokens.Add(refreshToken);
+        dbContext.RefreshTokens.Add(refreshTokenEntity);
         await dbContext.SaveChangesAsync();
+
+        httpContext.AppendAccessTokenCookie(
+            accessToken,
+            accessTokenExpiresAt);
+
+        httpContext.AppendRefreshTokenCookie(
+            refreshToken,
+            refreshTokenExpiresAt);
 
         return Results.Ok();
     }

@@ -1,3 +1,5 @@
+using NodaTime;
+
 namespace OpenGarden.Server.Extensions;
 
 public static class HttpContextExtensions
@@ -5,34 +7,49 @@ public static class HttpContextExtensions
     private const string AccessTokenCookieName = "accessToken";
     private const string RefreshTokenCookieName = "refreshToken";
 
-    public static void AppendAccessTokenCookie(this HttpContext httpContext, string token)
+    private static CookieOptions CookieOptions(Instant expiresAt) => new()
     {
-        httpContext.Response.Cookies.Append(AccessTokenCookieName, token, new CookieOptions
-        {
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Path = "/",
-            HttpOnly = true,
-            Expires = DateTimeOffset.UtcNow.AddMinutes(2)
-        });
+        Secure = true,
+        SameSite = SameSiteMode.Strict,
+        Path = "/",
+        HttpOnly = true,
+        Expires = expiresAt.ToDateTimeOffset()
+    };
+
+    public static void AppendAccessTokenCookie(
+        this HttpContext httpContext,
+        string token,
+        Instant expiresAt)
+    {
+        httpContext.Response.Cookies.Append(
+            AccessTokenCookieName,
+            token,
+            CookieOptions(expiresAt));
     }
 
-    public static void AppendRefreshTokenCookie(this HttpContext httpContext, string token)
+    public static void AppendRefreshTokenCookie(
+        this HttpContext httpContext,
+        string token,
+        Instant expiresAt)
     {
-        httpContext.Response.Cookies.Append(RefreshTokenCookieName, token, new CookieOptions
-        {
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Path = "/",
-            HttpOnly = true,
-            Expires = DateTimeOffset.UtcNow.AddDays(7)
-        });
+        httpContext.Response.Cookies.Append(
+            RefreshTokenCookieName,
+            token,
+            CookieOptions(expiresAt));
     }
 
     public static void DeleteAuthCookies(this HttpContext httpContext)
     {
-        httpContext.Response.Cookies.Delete(AccessTokenCookieName);
-        httpContext.Response.Cookies.Delete(RefreshTokenCookieName);
+        var options = new CookieOptions
+        {
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Path = "/",
+            HttpOnly = true
+        };
+
+        httpContext.Response.Cookies.Delete(AccessTokenCookieName, options);
+        httpContext.Response.Cookies.Delete(RefreshTokenCookieName, options);
     }
 
     public static string? GetRefreshToken(this HttpContext httpContext)
