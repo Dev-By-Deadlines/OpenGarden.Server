@@ -19,12 +19,24 @@ public class LoginHandler
     {
         var user = await userManager.FindByNameAsync(loginDto.UserName);
 
-        if (user is null ||
-            user.IsGuest ||
-            !await userManager.CheckPasswordAsync(user, loginDto.Password))
+        if (user is null || user.IsGuest)
         {
             return Results.Unauthorized();
         }
+
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            return Results.Unauthorized();
+        }
+
+        if (!await userManager.CheckPasswordAsync(user, loginDto.Password))
+        {
+            await userManager.AccessFailedAsync(user);
+
+            return Results.Unauthorized();
+        }
+
+        await userManager.ResetAccessFailedCountAsync(user);
 
         string accessToken = await tokenProvider.CreateAccessToken(user);
 
